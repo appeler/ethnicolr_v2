@@ -104,6 +104,7 @@ The Wikipedia data were originally collected by a team lead by Steven Skiena as 
 \begin{tabular}{ l c }
 \hline	
 race & n \\
+\hline
 Asian,GreaterEastAsian,EastAsian & 5,497 \\
 Asian,GreaterEastAsian,Japanese & 7,334 \\
 Asian,IndianSubContinent & 7,861 \\
@@ -117,6 +118,7 @@ GreaterEuropean,WestEuropean,Germanic & 3,869 \\
 GreaterEuropean,WestEuropean,Hispanic & 10,412 \\
 GreaterEuropean,WestEuropean,Italian & 11,867 \\
 GreaterEuropean,WestEuropean,Nordic & 4,813 \\
+\hline
 \end{tabular}
 \label{table:wikipedia_data}
 \end{table}
@@ -126,7 +128,7 @@ To derive some baselines, we also use the Census Bureau last name data. The Cens
 We can use the Wikipedia data and the Florida Voting Registration data as is but the Census data needs to be transformed before being used. The dataset that the Census Bureau issues aggregates data for each last name and provides percentage of people with the last name who are Black, White, Asian, Hispanic, etc. Given some names are more common than others (Smith is the last name of 2,376,206 Americans), and given our interest in modeling the population distribution, we take a weighted random sample from this data with weight equal to how common the last name is in the population. Next, we assign race to name roughly in proportion to how the name is distributed across the racial groups. We assign floor of pctwhite as whites, floor of pctblacks as blacks etc. And we lose the one or two or few observations as we are using floor. We use this as the final dataset.
 
 \section*{Model and Validation}
-For our full name model, we concatenate the last name and first name and capitalize the first character of all the words. We next split the name into two character chunks (bi-chars). For instance, Smith becomes Sm, mi, it, and th. We then remove infrequent bi-chars (occurring less than 3 times in the data) and very frequent bi-chars (occurring more than 30\% in the dataset). We use the remaining bi-chars as our vocabulary. We pad the sequences so that they are the same size. And we use 20 as the window size for the last name only model and 25 for the full name model. Lastly, we split the data randomly into train (80\%) and test (20\%). We next train a LSTM model. 
+For our full name model, we concatenate the last name and first name and capitalize the first character of all the words. We next split the name into two character chunks (bi-chars). For instance, Smith becomes {\tt Sm, mi, it, th}. We then remove infrequent bi-chars (occurring less than 3 times in the data) and very frequent bi-chars (occurring more than 30\% in the dataset). We use the remaining bi-chars as our vocabulary. We pad the sequences so that they are the same size. And we use 20 as the window size for the last name only model and 25 for the full name model. Lastly, we split the data randomly into train (80\%) and test (20\%). We next train a LSTM model \citep{graves2005framewise, gers1999learning}. 
 
 The table \ref{table:2} presents some metrics that shed light on how well we did with the last name only model in predicting race OOS.  The table \ref{table:3} presents some metrics that shed light on how well we did with the full name only model in predicting race OOS.  
 
