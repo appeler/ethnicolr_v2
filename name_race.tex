@@ -42,7 +42,7 @@
 %\usepackage{gfsdidot}
 \usepackage{chngcntr}
 
-\title{\Large{Predicting Race and Ethnicity From\\Sequence of Characters in a Name}\footnote{Data and scripts behind the analysis presented here can be downloaded at: \url{http://github.com/appeler/ethnicolr}.
+\title{\Large{Predicting Race and Ethnicity From\\Sequence of Characters in a Name}\footnote{Data and scripts behind the analysis presented here can be downloaded from \url{http://github.com/appeler/ethnicolr}.
 }}
 
 \author{Gaurav Sood\thanks{Gaurav can be reached at \href{mailto:gsood07@gmail.com}{\footnotesize{\texttt{gsood07@gmail.com}}}} \and Suriyan Laohaprapanon\thanks{Suriyan can be reached at: \href{mailto:suriyant@gmail.com}{\footnotesize{\texttt{suriyant@gmail.com}}}}\vspace{.5cm}}
@@ -132,7 +132,8 @@ To learn the association between the sequence of characters in names and race an
 
 On this set of sequences, we train a LSTM model using Keras \citep{chollet2015keras} and TensorFlow \citep{abadi2016tensorflow}. Before estimating the LSTM model, we embed each of the words onto a 32 length real-valued vector. We then estimate a LSTM with a .2 dropout \citep{srivastava2014dropout} and .2 recurrent dropout for regularization. The last layer is a dense layer with a softmax activation which ensures that the probabilities of each of the classes sum of 1. Because it is a classification problem, we use log loss as the loss function and use ADAM for optimization. We fit the model for 15 epochs with a batch size of 32.
 
-Table \ref{table:2} presents some metrics that shed light on how well we did with the last name only model in predicting race OOS using the Florida Voter Registration Data. The OOS precision is .78, recall is .79, and f1-score is .75. There is however sizable variation in recall across different racial and ethnic groups. For instance, recall is .94 for whites and just .13 for non-Hispanic blacks. 
+Table \ref{table:last_name_fl_voter_reg} presents some metrics that shed light on how well we did with the last name only model in predicting race OOS using the Florida Voter Registration Data. The OOS precision is .78, recall is .79, and f1-score is .75. There is however sizable variation in recall across different racial and ethnic groups. For instance, recall is .94 for whites and just .13 for non-Hispanic blacks.\footnote{You see the same pattern when we estimate the model on the Census last name data. Recall for blacks on the model estimated on both the 2000 and 2010 Census last name data is just .02 (see Table \ref{table:last_name_census_2000} and Table \ref{table:last_name_census_2010}).}
+
 \begin{table}[h!]
 \centering
 \caption{Performance of the Last Name LSTM Model on the Florida Voter Registration Data.}
@@ -147,10 +148,10 @@ Table \ref{table:2} presents some metrics that shed light on how well we did wit
 avg / total     &    0.78 & 0.79  &  0.75 & 2608775 \\
 \hline
 \end{tabular}
-\label{table:2}
+\label{table:last_name_fl_voter_reg}
 \end{table}
 
-Compared to the last name only model, we do much better with a full name model. The OOS precision, recall, and f1-score for the full name model is .83, .84, and .83 respectively (see Table \ref{table:3}). The gains are, however, asymmetric. are mainly driven by considerably better recall for Asians and Non-Hispanic blacks, which are now .45 each respectively (compared to .35 and .13 respectively). The accuracy for predicting non-Hispanic Blacks is also a good 6 points higher, and 
+Compared to the last name only model, we do much better with a full name model. The OOS precision, recall, and f1-score for the full name model is .83, .84, and .83 respectively (see Table \ref{table:full_name_fl_voter_reg}). The gains are, however, asymmetric. Recall is considerably better for Asians and Non-Hispanic blacks with the full name---.45 each, compared to .35 and .13 respectively. The gains in recall for Non-Hispanic blacks are expected given that African Americans have distinctive first names. The accuracy with which we predict non-Hispanic Blacks and Whites is also considerably higher---precision is 6 points higher for both non-Hispanic Blacks and Whites. Given Asians and Hispanics have more distinctive last names, the improvement in precision in predicting both is lower---negligible in case of Asians and 3 points in case of Hispanics.
 
 \begin{table}[h!]
 \centering
@@ -164,20 +165,74 @@ Compared to the last name only model, we do much better with a full name model. 
    nh black &  0.74 &  0.45 & 0.56  &    370,738\\
    nh white  & 0.86  & 0.93 & 0.89  &   1,751,454\\
 
-avg / total     &    0.83    &    0.84    &    0.83  &   2608775\\
+avg / total     &    0.83    &    0.84    &    0.83  &   260,8775\\
 \hline
 \end{tabular}
-\label{table:3}
+\label{table:full_name_fl_voter_reg}
 \end{table}
 
-Given poor African Americans have distinctive first names, the largest improvements in recall that we see are among African American names. We go from a poor recall of .13 for African American names in the last name model to a still poor but much-improved recall of .45 with the full name model.
-
-\section*{Application}
-To illustrate how the package can be used, we impute the race of the campaign contributors recorded by FEC for the years 2000 and 2010 using the DIME data \citep{bonica2017database} and tally campaign contributions by race. In 2000, nearly 96\% of the contributions were made by whites and just .16\% of the contributions were made by blacks (see Table~\ref{table:percentage_contrib_by_race}). In 2010, things didn't look a lot different, with nearly 94\% of the contributions being made by whites and just .22\% made by blacks.
+Moving to Wikipedia, the metrics look less pleasing than for the models based on the Florida voter registration data. This is expected. We have much less data and many more categories in the Wikipedia data. As Table ~\ref{table:last_name_wiki} shows, the OOS precision, recall, and f1-score for the last name only model is .65 each respectively. For the full name model, the metrics are considerably better. The precision, recall, and f1-score jump to .72, .73, and .72 respectively (see Table ~\ref{table:full_name_wiki}).
 
 \begin{table}[h!]
 \centering
-\caption{Proportion of Donors to Political Campaigns in 2000 and 2010 by Race.}
+\caption{Performance of the Last Name LSTM Model on the Wikipedia Data.}
+\begin{tabular}{ l c c c c }
+\hline    
+    race & precision & recall & f1-score & support \\
+\hline
+     Asian,GreaterEastAsian,EastAsian &      0.76 &     0.74  &    0.75  &    1,099 \\
+      Asian,GreaterEastAsian,Japanese &      0.82 &     0.84  &    0.83  &    1,467 \\
+             Asian,IndianSubContinent &      0.65 &     0.67  &    0.66  &    1,572 \\
+              GreaterAfrican,Africans &      0.50 &     0.36  &    0.42  &     734 \\
+                GreaterAfrican,Muslim &      0.56 &     0.52  &    0.54  &    1,248 \\
+              GreaterEuropean,British &      0.72 &    0.85   &   0.78  &    8,289 \\
+         GreaterEuropean,EastEuropean &      0.75 &     0.62  &    0.68 &     1,666 \\
+               GreaterEuropean,Jewish &      0.43 &     0.37   &   0.40 &     2,048 \\
+  GreaterEuropean,WestEuropean,French &      0.56 &     0.47  &    0.51 &     2,459 \\
+GreaterEuropean,WestEuropean,Germanic &      0.38 &     0.29  &    0.33 &      774 \\
+GreaterEuropean,WestEuropean,Hispanic &      0.63 &     0.49  &    0.55  &    2,082 \\
+ GreaterEuropean,WestEuropean,Italian &      0.61 &     0.74  &    0.67  &    2,374 \\
+  GreaterEuropean,WestEuropean,Nordic &      0.65 &     0.53  &    0.58  &     963 \\
+
+                          avg / total  &     0.65 &     0.65   &   0.65  &   26,775 \\
+\hline
+\end{tabular}
+\label{table:last_name_wiki}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the Full Name LSTM Model on the Wikipedia Data.}
+\begin{tabular}{ l c c c c }
+\hline    
+    race & precision & recall & f1-score & support \\
+\hline
+     Asian,GreaterEastAsian,EastAsian  &      0.86  &     0.80 &     0.83 &      1,099\\
+      Asian,GreaterEastAsian,Japanese  &      0.89  &     0.90  &     0.90 &      1,467\\
+             Asian,IndianSubContinent   &     0.78  &     0.75  &     0.76 &      1,572\\
+              GreaterAfrican,Africans   &     0.56   &    0.41  &     0.47  &      734\\
+                GreaterAfrican,Muslim  &    0.64  &     0.67  &     0.66 &      1,248\\
+              GreaterEuropean,British       0.76   &    0.88   &    0.81   &    8,289\\
+         GreaterEuropean,EastEuropean  &      0.76  &     0.74   &    0.75 &      1,666\\
+               GreaterEuropean,Jewish   &     0.51  &     0.42   &    0.46 &      2,048\\
+  GreaterEuropean,WestEuropean,French  &      0.69  &     0.61   &    0.65  &     2,459\\
+GreaterEuropean,WestEuropean,Germanic  &      0.49  &     0.43  &     0.46 &       774\\
+GreaterEuropean,WestEuropean,Hispanic   &     0.73  &     0.69  &     0.71 &      2,082\\
+ GreaterEuropean,WestEuropean,Italian  &      0.75  &     0.74  &     0.75 &      2,374\\
+  GreaterEuropean,WestEuropean,Nordic   &     0.75  &     0.62  &     0.68  &      963\\
+
+                          avg / total   &     0.72   &    0.73  &     0.72 &     26,775\\
+\hline
+\end{tabular}
+\label{table:full_name_wiki}
+\end{table}
+
+\section*{Application}
+To illustrate how the package can be used, we impute the race of the campaign contributors recorded by FEC for the years 2000 and 2010 using the DIME data \citep{bonica2017database} and tally campaign contributions by race. In 2000, nearly 96\% of the contributions were made by whites and just .16\% of the contributions were made by blacks (see Table~\ref{table:percentage_donations_by_race}). In 2010, things didn't look a lot different, with nearly 94\% of the contributions being made by whites and just .22\% made by blacks.
+
+\begin{table}[h!]
+\centering
+\caption{Proportion of Donations to Political Campaigns in 2000 and 2010 by Race.}
 \begin{tabular}{ l c  c}
 \hline    
 race & 2000  & 2010 \\    
@@ -188,18 +243,75 @@ hispanic &     2.57\%  & 4.04\%\\
 white &     95.84\%  & 93.60\%\\
 \hline
 \end{tabular}
+\label{table:percentage_donations_by_race}
+\end{table}
+
+It may be that blacks make much fewer number of donations as compared to whites but may donate a larger amount when they donate. What proportion of the total donated sum comes from people from different racial groups? As Table \ref{table:percentage_contrib_by_race} shows, the numbers are virtually unchanged. 
+
+\begin{table}[h!]
+\centering
+\caption{Proportion of Total Amount Donated to Political Campaigns in 2000 and 2010 by Race.}
+\begin{tabular}{ l c  c}
+\hline    
+race & 2000  & 2010 \\    
+\hline
+asian &     1.55\%  & 2.11\%\\
+black &     0.16\%  & .17\%\\
+hispanic &     2.49\%  & 2.82\%\\
+white &     95.81\%  & 94.90\%\\
+\hline
+\end{tabular}
 \label{table:percentage_contrib_by_race}
 \end{table}
 
 \section*{Discussion}
-We exploit a novel source of data---voter registration data---to learn a model between sequences of characters in a name and race or ethnicity. Given poor African Americans tend to have distinctive first names, the biggest advantage in using the full name model is in our ability to detect African American names. We use the model to infer the race of contributors in the DIME data and find that African Americans are less than a quarter percent of the donors. As we note, we also provide a Python package that exposes the models: \url{https://github.com/appeler/ethnicolr/}.
+We exploit a novel source of labeled data---voter registration files---to learn a model between sequences of characters in a name and race or ethnicity. Given poor African Americans tend to have distinctive first names, the biggest advantage in using the full name model is in our ability to detect African American names. We use the model to infer the race of contributors in the DIME data and find that African Americans are less than a quarter percent of the donors. As we note, we also provide a Python package that exposes the models: \url{https://github.com/appeler/ethnicolr/}.
 
-If you picked a random individual with last name Smith from the US in 2010 and asked us to guess this person's race (measured as crudely as by the census), the best guess would be based on what is available from the aggregated Census file. It is the Bayes Optimal Solution. So what good are last name only predictive models for? A few things. If you want to impute ethnicity at a more granular level, guess the race of people in different years (than when the census was conducted if some assumptions hold), guess the race of people in different countries (again if some assumptions hold), when names are slightly different (again with some assumptions), etc. The big benefit comes from when both the first name and last name is known.
+If you picked a random individual with last name Smith from the US in 2010 and asked us to guess this person's race (measured as crudely as by the census), the best guess would be based on what is available from the aggregated Census file. It is the Bayes optimal solution. So what good are last name only predictive models for? A few things. If you want to impute ethnicity at a more granular level, guess the race of people in different years (than when the census was conducted if some assumptions hold), guess the race of people in different countries (again if some assumptions hold), when names are slightly different (again with some assumptions), etc. The big benefit comes from when both the first name and last name is known. And there are a lot of important datasets, such as the campaign contributions dataset, the voter registration files of other states, news data, etc., where we have information on both the first and the last names. And we could make better predictions about the race and ethnicity by capitalizing on both the first and the last names, especially for African Americans, but also other ethnicities.
 
 The limitations of using the voter registration data are obvious. Not everyone is registered to vote, and blacks and Hispanics are especially likely not to be registered to vote \citep{ansolabehere2011gender}. If the names of those who are not on the voter registration file are systematically different from those who are, we are likely somewhat optimistic in our accuracy metrics. Another concern with using data from a single state is that the pattern of names in a single state are different from names given in other states. It is a very reasonable concern. We could overcome it by combining census last name models with state voter registration data models, but more research is needed to see how well we can do.
 
 \clearpage
 \bibliographystyle{apsr}
 \bibliography{name}
+
+\section*{Appendix: Census Models}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the Last Name LSTM Model on the Census 2000 Data.}
+\begin{tabular}{ l c c c c }
+\hline    
+   race & precision & recall & f1-score & support\\
+\hline
+   api  &     0.84    &  0.64 &     0.73     & 6,994\\
+      black   &    0.63      0.02 &     0.04    & 25,176\\
+   hispanic    &   0.86   &   0.83 &     0.85   &  25,629\\
+      white    &   0.82  &    0.98  &    0.89  &  142,201\\
+
+avg / total    &   0.80 &     0.83   &   0.77 &   200,000\\
+\hline
+\end{tabular}
+\label{table:last_name_census_2000}
+\end{table}
+
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the Full Name LSTM Model on the Census 2010 Data.}
+\begin{tabular}{ l c c c c }
+\hline    
+   race & precision & recall & f1-score & support\\
+\hline
+        api &      0.82  &    0.56     & 0.66 &    10,114\\
+      black &      0.64  &    0.02    &  0.04  &   24,807\\
+   hispanic &      0.87  &    0.76   &   0.81  &   32,923\\
+      white &      0.78  &   0.97   &   0.87   & 132,156\\
+
+avg / total &      0.78   &   0.80 &     0.74   & 200,000\\
+\hline
+\end{tabular}
+\label{table:last_name_census_2010}
+\end{table}
 
 \end{document}
