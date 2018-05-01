@@ -141,11 +141,13 @@ Table \ref{table:last_name_fl_voter_reg} presents some metrics that shed light o
 \hline    
     race & precision & recall & f1-score & support \\
 \hline
-   asian & 0.77 & 0.35 & 0.48 & 50,762 \\
-   hispanic &  0.80 & 0.81 & 0.80 & 435,821 \\
-   nh black & 0.68 & 0.13 & 0.22 & 370,738 \\
-   nh white & 0.80 & 0.94 & 0.86 & 1,751,454 \\
-avg / total     &    0.78 & 0.79  &  0.75 & 2608775 \\
+      asian &        0.77 &       0.41 &       0.54 &       4,527\\
+   hispanic &        0.74 &       0.69 &       0.71 &      18,440\\
+   nh black &        0.62 &       0.24 &       0.35 &      28,586\\
+   nh white &        0.83 &       0.94 &       0.88 &     146,009\\
+
+avg / total &        0.79 &       0.81 &       0.78 &     197,562\\
+
 \hline
 \end{tabular}
 \label{table:last_name_fl_voter_reg}
@@ -160,12 +162,12 @@ Compared to the last name only model, we do much better with a full name model. 
 \hline    
    race & precision & recall & f1-score & support\\
 \hline
-   asian & 0.77  & 0.45 & 0.56   &    50,762\\
-   hispanic  &  0.83 & 0.84 & 0.83  &    435,821\\
-   nh black &  0.74 &  0.45 & 0.56  &    370,738\\
-   nh white  & 0.86  & 0.93 & 0.89  &   1,751,454\\
+      asian &        0.77 &       0.49 &       0.60 &       4,527\\
+   hispanic &        0.76 &       0.73 &       0.75 &      18,440\\
+   nh black &        0.73 &       0.43 &       0.55 &      28,586\\
+   nh white &        0.86 &       0.95 &       0.90 &     146,009\\
 
-avg / total     &    0.83    &    0.84    &    0.83  &   260,8775\\
+avg / total &        0.83 &       0.84 &       0.83 &     197,562\\
 \hline
 \end{tabular}
 \label{table:full_name_fl_voter_reg}
@@ -180,21 +182,22 @@ Moving to Wikipedia, the metrics look less pleasing than for the models based on
 \hline    
     race & precision & recall & f1-score & support \\
 \hline
-     Asian,GreaterEastAsian,EastAsian &      0.76 &     0.74  &    0.75  &    1,099 \\
-      Asian,GreaterEastAsian,Japanese &      0.82 &     0.84  &    0.83  &    1,467 \\
-             Asian,IndianSubContinent &      0.65 &     0.67  &    0.66  &    1,572 \\
-              GreaterAfrican,Africans &      0.50 &     0.36  &    0.42  &     734 \\
-                GreaterAfrican,Muslim &      0.56 &     0.52  &    0.54  &    1,248 \\
-              GreaterEuropean,British &      0.72 &    0.85   &   0.78  &    8,289 \\
-         GreaterEuropean,EastEuropean &      0.75 &     0.62  &    0.68 &     1,666 \\
-               GreaterEuropean,Jewish &      0.43 &     0.37   &   0.40 &     2,048 \\
-  GreaterEuropean,WestEuropean,French &      0.56 &     0.47  &    0.51 &     2,459 \\
-GreaterEuropean,WestEuropean,Germanic &      0.38 &     0.29  &    0.33 &      774 \\
-GreaterEuropean,WestEuropean,Hispanic &      0.63 &     0.49  &    0.55  &    2,082 \\
- GreaterEuropean,WestEuropean,Italian &      0.61 &     0.74  &    0.67  &    2,374 \\
-  GreaterEuropean,WestEuropean,Nordic &      0.65 &     0.53  &    0.58  &     963 \\
+     Asian,GreaterEastAsian,EastAsian &        0.81 &       0.76 &       0.78 &       1,099 \\
+      Asian,GreaterEastAsian,Japanese &        0.82 &       0.87 &       0.84 &       1,467 \\
+             Asian,IndianSubContinent &        0.67 &       0.66 &       0.67 &       1,572 \\
+              GreaterAfrican,Africans &        0.52 &       0.36 &       0.42 &        734 \\
+                GreaterAfrican,Muslim &        0.54 &       0.50 &       0.52 &       1,248 \\
+              GreaterEuropean,British &        0.70 &       0.87 &       0.78 &       8,289 \\
+         GreaterEuropean,EastEuropean &        0.74 &       0.64 &       0.69 &       1,666 \\
+               GreaterEuropean,Jewish &        0.44 &       0.34 &       0.39 &       2,048 \\
+  GreaterEuropean,WestEuropean,French &        0.57 &       0.46 &       0.51 &       2,459 \\
+GreaterEuropean,WestEuropean,Germanic &        0.40 &       0.26 &       0.32 &        774 \\
+GreaterEuropean,WestEuropean,Hispanic &        0.62 &       0.50 &       0.56 &       2,082 \\
+ GreaterEuropean,WestEuropean,Italian &        0.63 &       0.73 &       0.67 &       2,374 \\
+  GreaterEuropean,WestEuropean,Nordic &        0.71 &       0.54 &       0.61 &        963 \\
 
-                          avg / total  &     0.65 &     0.65   &   0.65  &   26,775 \\
+                          avg / total &        0.65 &       0.66 &       0.65 &      26,775 \\
+
 \hline
 \end{tabular}
 \label{table:last_name_wiki}
@@ -207,21 +210,21 @@ GreaterEuropean,WestEuropean,Hispanic &      0.63 &     0.49  &    0.55  &    2,
 \hline    
     race & precision & recall & f1-score & support \\
 \hline
-     Asian,GreaterEastAsian,EastAsian  &      0.86  &     0.80 &     0.83 &      1,099\\
-      Asian,GreaterEastAsian,Japanese  &      0.89  &     0.90  &     0.90 &      1,467\\
-             Asian,IndianSubContinent   &     0.78  &     0.75  &     0.76 &      1,572\\
-              GreaterAfrican,Africans   &     0.56   &    0.41  &     0.47  &      734\\
-                GreaterAfrican,Muslim  &    0.64  &     0.67  &     0.66 &      1,248\\
-              GreaterEuropean,British       0.76   &    0.88   &    0.81   &    8,289\\
-         GreaterEuropean,EastEuropean  &      0.76  &     0.74   &    0.75 &      1,666\\
-               GreaterEuropean,Jewish   &     0.51  &     0.42   &    0.46 &      2,048\\
-  GreaterEuropean,WestEuropean,French  &      0.69  &     0.61   &    0.65  &     2,459\\
-GreaterEuropean,WestEuropean,Germanic  &      0.49  &     0.43  &     0.46 &       774\\
-GreaterEuropean,WestEuropean,Hispanic   &     0.73  &     0.69  &     0.71 &      2,082\\
- GreaterEuropean,WestEuropean,Italian  &      0.75  &     0.74  &     0.75 &      2,374\\
-  GreaterEuropean,WestEuropean,Nordic   &     0.75  &     0.62  &     0.68  &      963\\
+     Asian,GreaterEastAsian,EastAsian &        0.86 &       0.79 &       0.82 &       1,099 \\
+      Asian,GreaterEastAsian,Japanese &        0.91 &       0.89 &       0.90 &       1,467 \\
+             Asian,IndianSubContinent &        0.78 &       0.76 &       0.77 &       1,572 \\
+              GreaterAfrican,Africans &        0.56 &       0.44 &       0.49 &        734 \\
+                GreaterAfrican,Muslim &        0.67 &       0.66 &       0.67 &       1,248 \\
+              GreaterEuropean,British &        0.76 &       0.89 &       0.82 &       8,289 \\
+         GreaterEuropean,EastEuropean &        0.76 &       0.76 &       0.76 &       1,666 \\
+               GreaterEuropean,Jewish &        0.51 &       0.43 &       0.47 &       2,048 \\
+  GreaterEuropean,WestEuropean,French &        0.73 &       0.58 &       0.64 &       2,459 \\
+GreaterEuropean,WestEuropean,Germanic &        0.51 &       0.41 &       0.46 &        774 \\
+GreaterEuropean,WestEuropean,Hispanic &        0.71 &       0.69 &       0.70 &       2,082 \\
+ GreaterEuropean,WestEuropean,Italian &        0.74 &       0.75 &       0.75 &       2,374 \\
+  GreaterEuropean,WestEuropean,Nordic &        0.70 &       0.66 &       0.68 &        963 \\
 
-                          avg / total   &     0.72   &    0.73  &     0.72 &     26,775\\
+                          avg / total &        0.73 &       0.73 &       0.73 &      26,775 \\
 \hline
 \end{tabular}
 \label{table:full_name_wiki}
@@ -284,12 +287,12 @@ The limitations of using the voter registration data are obvious. Not everyone i
 \hline    
    race & precision & recall & f1-score & support\\
 \hline
-   api  &     0.84    &  0.64 &     0.73     & 6,994\\
-      black   &    0.63      0.02 &     0.04    & 25,176\\
-   hispanic    &   0.86   &   0.83 &     0.85   &  25,629\\
-      white    &   0.82  &    0.98  &    0.89  &  142,201\\
+      api      &   0.88   &  0.63  &     0.74   & 7,149\\
+      black    &   0.50   &  0.09  &     0.15   & 25,307\\
+   hispanic    &   0.86   &  0.84  &     0.85   & 25,620\\
+      white    &   0.83   &  0.96  &     0.89   & 141,924\\
 
-avg / total    &   0.80 &     0.83   &   0.77 &   200,000\\
+avg / total    &   0.79   &   0.83   &   0.79 &   200,000\\
 \hline
 \end{tabular}
 \label{table:last_name_census_2000}
@@ -303,12 +306,12 @@ avg / total    &   0.80 &     0.83   &   0.77 &   200,000\\
 \hline    
    race & precision & recall & f1-score & support\\
 \hline
-        api &      0.82  &    0.56     & 0.66 &    10,114\\
-      black &      0.64  &    0.02    &  0.04  &   24,807\\
-   hispanic &      0.87  &    0.76   &   0.81  &   32,923\\
-      white &      0.78  &   0.97   &   0.87   & 132,156\\
+        api &      0.84  &    0.57   &  0.68  &  10,071\\
+      black &      0.57  &    0.07   &  0.12  &  24,817\\
+   hispanic &      0.88  &    0.76   &  0.82  &  32,982\\
+      white &      0.79  &    0.97   &  0.87  &  132,130\\
 
-avg / total &      0.78   &   0.80 &     0.74   & 200,000\\
+avg / total &      0.78   &   0.80 &    0.76  & 200,000\\
 \hline
 \end{tabular}
 \label{table:last_name_census_2010}
