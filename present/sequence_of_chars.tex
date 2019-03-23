@@ -1,0 +1,226 @@
+\documentclass[compress]{beamer}
+\setbeamercolor{normal text}{fg=black}
+\beamertemplatesolidbackgroundcolor{white}
+\usecolortheme[named=black]{structure} 
+\usepackage{caption}
+\captionsetup{labelformat=empty}
+\setbeamertemplate{navigation symbols}{} 
+%\usefonttheme{structurebold}
+\usepackage{listings}
+\usepackage[scaled]{helvet}
+\renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
+\usepackage[T1]{fontenc}
+\usepackage{setspace}
+%\usepackage{beamerthemesplit}
+\usepackage{graphics}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage{amssymb}
+\usepackage{wrapfig}
+\usefonttheme[onlymath]{serif}
+\usepackage{cmbright}
+
+\def\labelitemi{\textemdash}
+\setbeamertemplate{frametitle}{
+	\begin{centering}
+		\vskip15pt
+		\insertframetitle
+		\par
+	\end{centering}
+} 
+\title[DS]{Predicting Race and Ethnicity From Sequence of Characters in a Name}
+\begin{document}
+\newcommand{\multilineR}[1]{\begin{tabular}[b]{@{}r@{}}#1\end{tabular}}
+\newcommand{\multilineL}[1]{\begin{tabular}[b]{@{}l@{}}#1\end{tabular}}
+\newcommand{\multilineC}[1]{\begin{tabular}[b]{@{}c@{}}#1\end{tabular}}
+\newcommand{\indep}{\rotatebox[origin=c]{90}{$\models$}}
+\newenvironment{large_enum}{
+\Large
+\begin{itemize}
+  \setlength{\itemsep}{7pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{itemize}}
+
+\begin{comment}
+
+setwd(paste0(githubdir, "ethnicolr_paper/present/"))
+tools::texi2dvi("sequence_of_chars.tex", pdf = TRUE, clean = TRUE)
+setwd(basedir)
+
+\end{comment}
+  \frame
+  {
+    \titlepage
+  }
+
+\frame{
+\frametitle{Why Names? Why !(Names)?}
+	\begin{large_enum}
+		\item[--]<2->Often all you have is a name\\
+			\alert<3>{\normalsize{Media, lenders and creditors, patients, ...}}
+		\item[--]<4->Highlight, Fight, Prevent (Regress Out)
+		\begin{itemize}
+			\item[--]<5->Fairness in lending
+			\item[--]<6->Media coverage, sources
+			\item[--]<7->Political Accountability
+			\item[--]<8->Personalization---recommending same race doctor
+		\end{itemize}
+		\item[--]<9->Flip side: Instrument for Discrimination
+	\end{large_enum}
+}
+
+\frame{
+	\frametitle{Learning From Names}
+	\begin{large_enum}
+		\item[--]<1->$p(\text{label}|\text{data})$ or $p(\neg\text{label}|\text{data})$
+		\item[--]<2->Bayes Classifier:
+				\begin{enumerate}
+					 \item[--]<3-> Classify to the majority class
+					 \item[--]<4-> Makes the least mistakes
+					 \item[--]<5-> Census Last Name Dataset
+				 \end{enumerate}
+		\item[--]<6->When can you do better?
+    		\begin{enumerate}
+    			\item[--]<7->More than last name. e.g. African-American have more distinctive first names
+    			\item[--]<8->Not all first names
+			    \item[--]<9->Capturing sounds, abstracting out
+			    \item[-]<10->Common Sequences: \texttt{da\_as\_sh\_ia\_an, ne\_ej\_ja\_ad, sa\_ad\_eh, jo\_oh\_ha\_an\_ns\_se\_en}
+			\end{enumerate}
+	\end{large_enum}
+}
+
+\frame{
+	\frametitle{How to Classify Text}
+		\begin{large_enum}
+			\item[--]<1-> Text $\leadsto$ Embeddings $\leadsto$ Classifier
+				\begin{enumerate}
+					\item[--]<2-> Embeddings leverage the adage:\\
+								  You are the company you keep.
+					\item[--]<3-> Use a large corpus
+					\item[--]<4-> Learn context well
+					\item[--]<5-> Preserve a few hundred vectors and pass it to a model 
+					\item[--]<6-> Skiena et al. use communication networks to find embeddings of names
+				\end{enumerate}
+			\item[--]<7->In Our Case:
+				\begin{enumerate}
+					\item[--]<8-> Embeddings of bi-chars
+					\item[--]<9-> LSTM
+				\end{enumerate}
+		\end{large_enum}
+}
+
+\frame{
+	\frametitle{Dependent Variable, Data}
+		\begin{large_enum}
+			\item[--]<1->What do you mean by race and ethnicity?
+				\begin{enumerate}
+		 			\item[--]<2-> Self-described
+		 			\item[--]<3-> Crudely coded
+		 			\item[--]<4-> One measure of group $=$ Are you willing to fight for it?
+		 			\item[--]<5-> There is systematic variation across names across linguistic groups within India
+		 		\end{enumerate}
+		 	\item[--]<6->Data
+				\begin{enumerate}
+		 			\item[--]<7-> Voting Registration data from Florida\\
+		 			\item[--]<8-> Race/Ethnicity = Asian or Pacific Islander, Hispanic, NH Black, NH White
+		 			\item[--]<9-> Wikipedia Data
+		 		\end{enumerate}
+		 	
+		\end{large_enum}
+}
+
+\frame{
+	\frametitle{Success}
+		\begin{table}[!htb] 
+		\small
+		\centering
+		\begin{tabular}{|cc|cc|}
+			\hline
+			   			& 		 & \multicolumn{2}{c|}{\textbf{F1-Score}} \\
+			   			& 		 & Last Name 			& Full Name\\[0.5ex]
+				\cline{2-4}
+				\textbf{Race}    & Asian      &   .54     & .60\\[0.5ex]
+				        	     & Hispanic   &   .72     & .75\\[0.5ex]
+				        	     & \alert<2-3>{NH Black}   &   \alert<2-3>{.32}     & \alert<3>{.55}\\[0.5ex]
+				        	     & NH White   &   .88     & .90\\[0.5ex]
+			    \hline
+		\end{tabular}
+		\end{table}
+}
+
+\frame{
+	\frametitle{Application}
+\begin{table}[h!]
+\centering
+\caption{Percentage Donated to Political Campaigns in 2000 and 2010 by People of Different Races/Ethnicities.}
+\begin{tabular}{ l c c c c}
+\hline
+         & \multicolumn{2}{c}{Census} & \multicolumn{2}{c}{Florida}\\
+\hline
+race     &     2000     & 2010     &    2000    & 2010\\    
+\hline
+asian    &     2.22\%   & 2.74\%   &   2.00\%   & 2.28\%\\
+black    &     11.04\%  & 10.22\%  &   8.93\%   & 7.92\%\\
+hispanic &     3.24\%   & 4.32\%   &   3.23\%   & 3.31\%\\
+white    &     83.49\%  & 82.71\%  &   85.84\%  & 86.49\%\\
+\hline
+\end{tabular}
+\label{table:percentage_contrib_by_race}
+\end{table}
+}
+
+\frame{
+	\frametitle{General Principles of Packaging ML}
+	 \begin{large_enum}
+		\item[--]<1-> Does the relationship between X and Y:
+			\begin{enumerate}
+			\item[--]<2-> Vary by time?
+			\item[--]<3-> Vary by space?
+			\item[--]<4-> Capture variation not captured in Xs in arguments to the API call
+			\end{enumerate}
+		\item[--]<5-> Is the model fixed? Add versioning.
+		\item[--]<6-> API call for Model Performance on Benchmarks
+		\item[--]<7-> Failsafe on predictions
+	\end{large_enum}
+}	 		
+
+\frame{
+	\frametitle{Python Package}
+\begin{lstlisting}
+# pip install ethnicolr
+
+> import pandas as pd
+
+> from ethnicolr import census\_ln, pred\_census\_ln \\
+Using TensorFlow backend.
+
+> names = [{`name': `smith'}, \\
+...         {`name': `zhang'}, \\
+...         {`name': `jackson'}] \\
+
+> df = pd.DataFrame(names)
+
+> census\_ln(df, `name', 2010) \\
+\end{lstlisting}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ l llll}
+name     &   race   & pctwhite &  pctblack & pctapi\\    
+smith    &   white  &  70.9    &  23.11    & 0.5\\
+zhang    &   api 	& 0.99     &  0.16     & 98.06\\
+jackson  &   black 	& 39.89    &  53.04    & 0.39\\
+\end{tabular}
+\label{table:percentage_contrib_by_race}
+\end{table}
+}
+
+\frame{
+	\frametitle{Last Words}
+	
+	\huge{Thank you!}	
+}
+
+\end{document}

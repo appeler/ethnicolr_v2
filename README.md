@@ -1,2 +1,3 @@
-# ethnicolr_paper
-Short paper based on ethnicolr
+# Ethnicolr: Paper and Presentation
+
+In 2018, we released [](). Here's a short paper and presentation
