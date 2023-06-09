@@ -69,7 +69,7 @@ How often are people of different races and ethnicities covered in the news? Wha
 
 \subsection*{Measurement of Race and Ethnicity} Florida Voter Registration data provide self-reported race and ethnicity of people. Even though race and ethnicity are self-reported, the limitations of the reporting instrument mean that the quality of the data is debatable. For one, Florida Voter Registration data treats race and ethnicity as one dimension with Hispanic treated as one category. Second, the instrument only allows crude categorization. For instance, Indian Americans are grouped under Asian and Pacific Islanders. 
 
-\subsection*{Why Model?} If you picked a person at random with the last name Smith in the US in 2010 and were asked to guess the person's modal race (as measured by the Census), the best guess would be based on what is available from the aggregated Census file. It is the Bayes Optimal Solution. So what good are predictive models for? A few things---if you want to impute race and ethnicity for last names that are not in the census file, infer the race and ethnicity in different years than when the census was conducted (if some assumptions hold), infer the race of people in different countries (if some assumptions hold), etc. The biggest benefit comes in cases where both the first name and last name are known.
+\subsection*{Why Model?} If you picked a random individual with last name Smith from the US in 2010 and asked us to guess this person's race (measured as crudely as by the census), the best guess would be based on what is available from the aggregated Census file. It is the Bayes optimal solution. So what good are last name only predictive models for? A few things. If you want to impute ethnicity at a more granular level, guess the race of people in different years (than when the census was conducted if some assumptions hold), guess the race of people in different countries (again if some assumptions hold), when names are slightly different (again with some assumptions), etc.
 
 \section*{Data}
 We exploit Florida Voting Registration data for the year 2022 \citep{sood_2017}. The Florida Voting Registration has information on nearly 15M voters along with their race. Given that we have very few people who identify as multi-racial and Native American, we condense them into Other. Our final dataset only has five categories: Asian/Pacific Islander, Hispanic, Non-Hispanic Blacks, Non-Hispanic Whites, and Other (see Table \ref{table:fl_data}). 
@@ -140,7 +140,6 @@ avg / total &        0.83 &       0.84 &       0.83 &     197,562\\
 \label{table:full_name_fl_voter_reg}
 \end{table}
 
-
 \section*{Application}
 To illustrate the utility of the models that we have developed here, we impute the race and ethnicity of individual campaign contributors in the 2000 and 2010 campaign contribution databases \citep{bonica2017database} using just the Census last name data and the Florida full name model. We then use the inferred race and ethnicity to estimate the proportion of total contributions made by people of different races. 
 
@@ -165,9 +164,9 @@ white    &     83.49\%  & 82.71\%  &   85.84\%  & 86.49\%\\
 \end{table}
 
 \section*{Discussion}
-We exploit a novel source of labeled data---voter registration files---along with the Wikipedia data to learn a model between sequences of characters in a name and race or ethnicity. Given poor African Americans tend to have distinctive first names, the biggest advantage in using the full name model is in our ability to detect African American names. We then use the model to infer the race of contributors in the DIME data and find that African Americans are less than a quarter percent of the donors. As we note, we also provide a Python package that exposes the models: \url{https://github.com/appeler/ethnicolr/}.
+We use voter registration data to learn a model between sequences of characters in a name and race and ethnicity. Given poor African Americans tend to have distinctive first names, the biggest advantage in using the full name as opposed to last names is in our ability to detect African American names. The big benefit comes from when both the first name and last name is known. And there are a lot of important datasets, such as the campaign contributions dataset, the voter registration files of other states, news data, etc., where we have information on both the first and the last names. And we could make better predictions about the race and ethnicity by capitalizing on both the first and the last names, especially for African Americans, but also for other races and ethnicities.
 
-If you picked a random individual with last name Smith from the US in 2010 and asked us to guess this person's race (measured as crudely as by the census), the best guess would be based on what is available from the aggregated Census file. It is the Bayes optimal solution. So what good are last name only predictive models for? A few things. If you want to impute ethnicity at a more granular level, guess the race of people in different years (than when the census was conducted if some assumptions hold), guess the race of people in different countries (again if some assumptions hold), when names are slightly different (again with some assumptions), etc. The big benefit comes from when both the first name and last name is known. And there are a lot of important datasets, such as the campaign contributions dataset, the voter registration files of other states, news data, etc., where we have information on both the first and the last names. And we could make better predictions about the race and ethnicity by capitalizing on both the first and the last names, especially for African Americans, but also for other races and ethnicities.
+We then use the model to infer the race of contributors in the DIME data and find that African Americans are less than a quarter percent of the donors. As we note, we also provide a Python package that exposes the models: \url{https://github.com/appeler/ethnicolr/}.
 
 The limitations of using the voter registration data are obvious. Not everyone is registered to vote, and blacks and Hispanics are especially likely not to be registered to vote \citep{ansolabehere2011gender}. If the names of those who are not on the voter registration file are systematically different from those who are, we are likely somewhat optimistic in our accuracy metrics. Another concern with using data from a single state is that the pattern of names in a single state are different from names given in other states. It is a very reasonable concern. We could overcome it by combining census last name models with state voter registration data models, but more research is needed to see how well we can do.
 
@@ -175,6 +174,143 @@ The limitations of using the voter registration data are obvious. Not everyone i
 \bibliographystyle{apsr}
 \bibliography{name}
 \clearpage
+
+\appendix
+\renewcommand{\thesection}{SI \arabic{section}}
+\renewcommand\thetable{\thesection.\arabic{table}}  
+\renewcommand\thefigure{\thesection.\arabic{figure}}
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+\section*{Supporting Information}\label{si}
+
+\section{Performance of the Random Forest Models}\label{rf_perf}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the Last Name Random Forest model on the test set.}
+\begin{tabular}{lrrrr}
+\hline
+              &   precision &   recall &   f1-score &   support \\
+\hline
+ asian        &        0.09 &     0.05 &       0.06 &      6,867 \\
+ hispanic     &        0.69 &     0.66 &       0.68 &     38,961 \\
+ nh\_black     &        0.34 &     0.17 &       0.23 &     13,726 \\
+ nh\_white     &        0.6  &     0.73 &       0.66 &     60,970 \\
+ other        &        0.17 &     0.15 &       0.16 &     14,374 \\
+ weighted\_avg &        0.53 &     0.56 &       0.54 &    134,898 \\
+\hline
+\label{table:rf_last_name}
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the Full Name Random Forest model trained on 2M records on the test set.\textsuperscript{*}}
+\begin{tabular}{lrrrr}
+\hline
+              &   precision &   recall &   f1-score &   support \\
+\hline
+ hispanic     &        0.78 &     0.66 &       0.72 &    169,058 \\
+ nh\_black     &        0.66 &     0.25 &       0.36 &    149,299 \\
+ nh\_white     &        0.72 &     0.94 &       0.81 &    573,470 \\
+ other        &        0.12 &     0.02 &       0.03 &     40,192 \\
+ weighted\_avg &        0.69 &     0.72 &       0.68 &    959,848 \\
+\hline
+\multicolumn{5}{l}{\textit{Note:} We decided on 2M records because of computational}\\
+\multicolumn{5}{l}{constraints and because the performance of the model}\\
+\multicolumn{5}{l}{trained on 2M records was very close to the performance}\\
+\multicolumn{5}{l}{of the model trained on 1M records.}
+\end{tabular}
+\label{table:rf_full_name_2m}
+\end{table}
+
+\clearpage
+\section{Performance of the Gradient Boosting Models}\label{gbm_perf}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the Last Name Gradient Boosted Trees model on the test set.}
+\begin{tabular}{lrrrr}
+\hline
+              &   precision &   recall &   f1-score &   support \\
+\hline
+ hispanic     &        0.78 &     0.67 &       0.72 &     38,961 \\
+ nh\_black     &        0.62 &     0.08 &       0.15 &     13,726 \\
+ nh\_white     &        0.56 &     0.92 &       0.7  &     60,970 \\
+ other        &        0.35 &     0    &       0    &     14,374 \\
+ weighted\_avg &        0.61 &     0.62 &       0.54 &    134,898 \\
+\hline
+\label{table:gb_last_name}
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the Full Name Gradient Boosted Trees model learned on 2M examples on the test set}
+\begin{tabular}{lrrrr}
+\hline
+              &   precision &   recall &   f1-score &   support \\
+\hline
+ asian        &        0.73 &     0.1  &       0.17 &     27,829 \\
+ hispanic     &        0.75 &     0.53 &       0.62 &    169,058 \\
+ nh\_black     &        0.76 &     0.08 &       0.14 &    149,299 \\
+ nh\_white     &        0.67 &     0.96 &       0.79 &    573,470 \\
+ other        &        0.43 &     0    &       0.01 &     40,192 \\
+ weighted\_avg &        0.69 &     0.68 &       0.61 &    959,848 \\
+\hline
+\multicolumn{5}{l}{\textit{Note:} We decided on 2M records because of computational}\\
+\multicolumn{5}{l}{constraints and because the performance of the model}\\
+\multicolumn{5}{l}{trained on 2M records was very close to the performance}\\
+\multicolumn{5}{l}{of the model trained on 1M records.}
+\end{tabular}
+\label{table:gb_full_name_2m}
+\end{table}
+
+\singlespacing
+\textsuperscript{*} 
+\doublespacing
+
+\clearpage
+\section{Performance of the LSTM Models}\label{lstm_perf}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the Last Name LSTM model on the test set.}
+\begin{tabular}{llrrrr}
+\hline
+          & precision   &    recall &   f1-score &   support \\
+\hline
+ asian    & 0.41        &      0.19 &       0.26 &   6,859    \\
+ hispanic & 0.83        &      0.7  &       0.76 &  38,927    \\
+ nh\_black & 0.59        &      0.4  &       0.48 &  13,719    \\
+ nh\_white & 0.62        &      0.87 &       0.72 &  60,919    \\
+ other    & 0.27        &      0.09 &       0.13 &  14,360    \\
+ weighted avg         &      0.63 &       0.65 & 0.62 & 134,784\\
+\hline
+\label{table:lstm_last_name}
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the Full Name LSTM model on the test set.}
+\begin{tabular}{llrrrr}
+\hline
+          & precision   &    recall &   f1-score &   support \\
+\hline
+ asian    & 0.65        &      0.57 &       0.61 &  27,827    \\
+ hispanic & 0.79        &      0.83 &       0.81 & 169,038    \\
+ nh\_black & 0.73        &      0.69 &       0.71 & 149,283    \\
+ nh\_white & 0.85        &      0.9  &       0.88 & 573,409    \\
+ other    & 0.39        &      0.08 &       0.13 &  40,187    \\
+ weighted avg       &   0.8  &       0.81 &      0.8 & 959,744 \\
+\hline
+\label{table:lstm_full_name}
+\end{tabular}
+\end{table}
+
+\clearpage
+\section{Performance of the Transformer Models}\label{transformer_perf}
 
 
 \end{document}
