@@ -13,3 +13,10 @@ ethnicolr/data/fl_voter_reg/
 lit/
 dev/
 
+models/rf_model_lastname.joblib
+models/rf_vec_fullname.joblib
+models/rf_vec_fullname_1M.joblib
+models/rf_vec_fullname_2M.joblib
+models/rf_vec_lastname.joblib
+models/rf_vec_lastname_1M.joblib
+models/rf_vec_lastname_2M.joblib
