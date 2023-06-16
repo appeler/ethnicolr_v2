@@ -1,6 +1,8 @@
 ### Ethnicolr 2023 Paper Replication Materials
 
+### Data
 
+* [FL 2022 Voter Registration Data](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UBIG3F)
 
 ### Scripts
 
@@ -44,6 +46,10 @@
 
 12. [Create Tables](notebooks/create_tables.ipynb)
 
+### Models
+
+* [Models](models/)
+	- Excludes large RF models. We don't see the point of including models that are not very computationally expensive but have very large model files.
 
 ### Tables
 
