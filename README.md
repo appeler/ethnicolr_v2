@@ -36,7 +36,14 @@
 8. LSTM with Synthetic Data Last Name
 	* [Synthetic Data](notebooks/6.0_lastname_variations.ipynb). Output [here](data/name_variations.csv)
 
-9. [Create Tables](notebooks/create_tables.ipynb)
+9. Validation
+
+10. Application
+
+11. Interpretation
+
+12. [Create Tables](notebooks/create_tables.ipynb)
+
 
 ### Tables
 
@@ -48,7 +55,7 @@
 
 ### History
 
-In 2018, we released [ethnicolr](https://github.com/appeler/ethnicolr), which uses sequence of characters in a name to predict race and ethnicity. Here's a [short paper](ms/) and [presentation](present/) associated with the package.
+The 2018 version of the paper and pres. is [here](old_paper_and_pres/).
 
 ### Authors
 
