@@ -16,27 +16,27 @@
 	* [Last Name](notebooks/1.2_rf_lastname.ipynb)
 
 3. Gradient Boosting
-	* [Full Name (with bigram)](notebooks/2.1_gb_fullname.ipynb)
+	* [Full Name](notebooks/2.1_gb_fullname.ipynb)
 	* [Last Name](notebooks/2.2_gb_lastname.ipynb)
 
 4. LSTM
-	* [Full Name (with bigram)](notebooks/3.1_lstm_fullname.ipynb)
+	* [Full Name](notebooks/3.1_lstm_fullname.ipynb)
 	* [Last Name](notebooks/3.2_lstm_lastname.ipynb)
 
 5. Transformer
-	* [Full Name (with bigram)](notebooks/4.1_transformer_fullname.ipynb)
+	* [Full Name](notebooks/4.1_transformer_fullname.ipynb)
 	* [Last Name](notebooks/4.2_transformer_lastname.ipynb)
 
 6. KNN Cosine Distance
-	* [Full Name (with bigram)](notebooks/3.1_lstm_fullname.ipynb)
-	* [Last Name](notebooks/3.2_lstm_lastname.ipynb)
+	* [Full Name](notebooks/6.1_knn_fullname.ipynb)
+	* [Last Name](notebooks/6.2_knn_lastname.ipynb)
 	* See also [Github Repository](https://github.com/appeler/edit_names) for stuff like LSH Minhash implementation.
 
 7. Multi Output Regression
 	* [Last Name](notebooks/5.2_multioutput_regressor_lastname.ipynb)
 
 8. LSTM with Synthetic Data Last Name
-	* [Synthetic Data](notebooks/6.0_lastname_variations.ipynb). Output [here](data/name_variations.csv)
+	* [Synthetic Data](notebooks/8.0_lastname_variations.ipynb). Output [here](data/name_variations.csv)
 
 9. Validation
 
