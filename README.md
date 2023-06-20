@@ -37,12 +37,24 @@
 
 8. LSTM with Synthetic Data Last Name
 	* [Synthetic Data](notebooks/8.0_lastname_variations.ipynb). Output [here](data/name_variations.csv)
+	* [Model](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/3.3_pytorch_lstm_lastname_with_gen.ipynb)
 
 9. Validation
+	* North Carolina
+	* Census
+	* Rosenman et al.
 
 10. Application
+	* Diversity of Campaign Donations
+		* [DIME](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/9.1_stanford_dime.ipynb) from https://data.stanford.edu/dime
+		* [Analyses](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/9.2_dime_lstm_infer.ipynb)
+	* Diversity in News
+		* [CNN Data Parsing](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/10.1_cnn_news_ner_data.ipynb)
+			(data from: https://github.com/notnews/top_news)
+		* [CNN Analyses](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/10.2_cnn_lstm_infer.ipynb)
 
 11. Interpretation
+	* [RF](notebooks/11.1_rf_fullname_interp.ipynb)
 
 12. [Create Tables](notebooks/create_tables.ipynb)
 
