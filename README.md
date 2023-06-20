@@ -52,11 +52,15 @@
 		* [CNN Data Parsing](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/10.1_cnn_news_ner_data.ipynb)
 			(data from: https://github.com/notnews/top_news)
 		* [CNN Analyses](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/10.2_cnn_lstm_infer.ipynb)
+		* Fuller analysis will be posted here: https://github.com/notnews/rainbow
 
 11. Interpretation
 	* [RF](notebooks/11.1_rf_fullname_interp.ipynb)
 
 12. [Create Tables](notebooks/create_tables.ipynb)
+
+13. Uncertainty
+	- https://github.com/appeler/uncertain_names
 
 ### Models
 
