@@ -20,3 +20,6 @@ models/rf_vec_fullname_2M.joblib
 models/rf_vec_lastname.joblib
 models/rf_vec_lastname_1M.joblib
 models/rf_vec_lastname_2M.joblib
+ms/icwsm/name_race.aux
+ms/icwsm/name_race.bbl
+ms/icwsm/name_race.blg
