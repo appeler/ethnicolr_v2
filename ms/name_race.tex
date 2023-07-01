@@ -71,9 +71,9 @@ How often are people of different races and ethnicities covered in the news? Wha
 \subsection*{Why Model?} If you picked a person at random with the last name Smith from the US in 2010 and were asked to guess this person's race (as measured by the census), the best guess would be based on what is available from the aggregated Census popular last names file. It is the Bayes optimal solution. So what good are last-name predictive models for? Primarily two things. First, the model is useful to predict the race and ethnicity of people whose names are not in the popular last names list. Second, it can be useful in predicting the race and ethnicity of names in databases where names have spelling errors, etc.
 
 \section*{Data}
-We exploit Florida Voting Registration data for the year 2022 \citep{sood_2017}. The Florida Voting Registration has information on nearly 15M voters along with their self-reported race. Even though race and ethnicity are self-reported, the limitations of the reporting instrument mean that the quality of the data is debatable. For one, Florida Voter Registration data treats race and ethnicity as one dimension with Hispanic treated as one category. Second, the instrument only allows crude categorization. For instance, Indian Americans are grouped under Asian and Pacific Islanders. In all, we have a self-reported race variable that takes 7 values: Non-Hispanic White, Non-Hispanic Black, Hispanic, Asian or Pacific Islander, Native American, Multi-racial, and Unknown. 
+We exploit Florida Voting Registration data for 2022 \citep{sood_2017}. Florida Voting Registration has information on nearly 15M voters along with their self-reported race. Even though race and ethnicity are self-reported, the limitations of the reporting instrument mean that the quality of the data is debatable. For one, Florida Voter Registration data treats race and ethnicity as one dimension with Hispanic treated as one category. Second, the instrument only allows crude categorization. For instance, Indian Americans are grouped under Asians and Pacific Islanders. In all, we have a self-reported race variable that takes 7 values: Non-Hispanic White, Non-Hispanic Black, Hispanic, Asian or Pacific Islander, Native American, Multi-racial, and Unknown. 
 
-There are very few cases of people not providing their race or ethnicity. We assume that the data are missing at random and remove them from our data. Given that we have very few people who identify as multi-racial and Native American, we condense them into Other. Our final dataset has five categories: Asian/Pacific Islander, Hispanic, Non-Hispanic Blacks, Non-Hispanic Whites, and Other (see Table \ref{table:fl_data}). 
+There are very few cases of people not providing their race or ethnicity. We assume that the data are missing at random and remove them from our data. Given that we have very few people who identify as multi-racial and Native American, we condense them into Other. Our final dataset has five categories: Asian/Pacific Islander, Hispanic, Non-Hispanic Blacks, Non-Hispanic Whites, and Other (see Table \ref{table:fl_data}). Lastly, we drop cases where the last name is just 1 character which causes us to lose 75,000 of the roughly 15 million observations. 
 
 \begin{table}[h!]
 \centering
@@ -95,24 +95,25 @@ other      &       424308 \\
 In addition to the Florida Voter Registration data, we also use the Census Popular Last Name Data \citep{census2010} and the North Carolina Voter Registration Data. 
 
 \section*{Models}
-We try models of all degrees of sophistication starting with an edit distance based KNN model. We follow that by representing names as `Bag of Characters' and learning the relationship with ethno-racial categories using Random Forests and Gradient Boosted Trees. Lastly, we model the relationship between the sequence of characters and categories using LSTM and Transformer models. For last names for which we have much more limited data, we also try an LSTM model that leverages synthetic data. 
+We try models with varying degrees of sophistication starting with the simplest: an edit-distance based KNN model. We follow that by representing names as a 'Bag of Characters' and learning the relationship with ethno-racial categories using Random Forests and Gradient Boosted Trees. Lastly, we model the relationship between the sequence of characters and categories using LSTM and Transformer models. For last names for which we have much less data, we also try an LSTM model that leverages synthetic data.
 
-We estimate the last name model on a title case transformed version of the last name. For the full name model, we concatenate the last name and first name (ignoring the middle name) and again capitalize each word. 
-
-To learn all the classifiers except for KNN, which doesn't have a conventional training set, we split the corpus into train, validation, and test sets with proportions of .8, .1, and .1 respectively. We remove rows where the last name and first name are missing, where the last name is just 1 character. We also filter the rows where the race is unknown, assuming that the race is missing at random. We then group data by last name or full name and get the conditional means for each of the five ethno-racial categories and find the modal race. 
+For the models, we process the data in the following way. We first process the names: 1. transform the first and last names to title case, 2. remove any non-alphabetical characters or hyphens, 3. concatenate the last name and first name (ignoring the middle name) for the full name model. Second, we group data by last name or full name and get the conditional means for each of the five ethno-racial categories and find the modal race. These datasets serve as our final data. To learn all the classifiers, we split the corpus into train, validation, and test sets with proportions of .8, .1, and .1 respectively.
 
 \begin{itemize}
 
-    \item \textbf{KNN} If we had a census of all the names, and the name was the only data we had about a person, then the Bayes Optimal Classifier for predicting the race of the person with that name is the racial category with the largest probability density. As we noted above, this data is not available. Assuming we do not have the full list of names or that names can have spelling errors, the next simplest classifier is an edit-distance-based classifier. We use a bi-char-based distance metric to estimate a KNN classifier. We split the data into the lookup corpus, a validation set that allows us to choose the optimal $k$, and a test set to see if the results generalize. For the last name model, we use cosine distance. For computational reasons, for the full name model, we use the Jaccard distance via LSH Minhash for 80\% of the training set.
+    \item \textbf{KNN} If we had a census of all the names, and the name was the only data we had about a person, then the Bayes Optimal Classifier for predicting the race of the person with that name is the racial category with the largest probability density. As we noted above, this data is unavailable. Assuming we do not have the full list of names or that names in the right table can have spelling errors, the next simplest classifier is an edit-distance-based classifier. We use a bi-char-based distance metric to estimate a KNN classifier. For the last name model, we use cosine distance.\footnote{Experiments suggest that using a more computationally expensive distance metric like Levenshtein distance doesn't improve performance: \url{ttps://github.com/appeler/edit_names}}. For computational reasons, for the full name model, we use the Jaccard distance via LSH Minhash for 70\% of the training set.
 
-    \item \textbf{RF and GB} We use a bag of char and bi-char representation of names to learn the relationship between names and ethno-racial categories. We split the strings (last name or last name and first name) into two character chunks (bi-chars). For instance, Smith becomes {\tt Sm, mi, it, th}. Next, we remove infrequent bi-chars (occurring less than 3 times in the data) and very frequent bi-chars (occurring in over 30\% of the sequences in the data). For the precise hyperparameters, please refer to the notebooks.
+    \item \textbf{RF and GB} We use a bag of char and bi-char representation of names to learn the relationship between names and ethno-racial categories. We remove infrequent tokens (occurring less than 3 times in the data) and very frequent bi-chars (occurring in over 30\% of the sequences in the data). (See the notebooks for more details.)
     
-    \item \textbf{LSTM} To learn the association between the sequence of characters in names and race and ethnicity, we estimate an LSTM model \citep{graves2005framewise, gers1999learning} on the Florida Voter Registration Data. On this set of sequences, we train an LSTM model. Before estimating the LSTM model, we embed each of the words onto a 32-length real-valued vector. We then estimate the LSTM with a .2 dropout and .2 recurrent dropout for regularization \citep{srivastava2014dropout}. The last layer is a dense layer with a log softmax activation. Because it is a classification problem, we use log loss as the loss function. And we use ADAM for optimization \citep{kingma2014adam}. We fit the model for 15 epochs with a batch size of 32.
+    \item \textbf{LSTM} To learn the association between the sequence of characters in names and race and ethnicity, we estimate an LSTM model \citep{graves2005framewise, gers1999learning}. We embed each of the characters in the name in a 256-length real-valued vector before passing it on to two LSTM layers followed by a fully connected layer and a log softmax. We use Negative Log Likelihood Loss and Adam for optimization \citep{kingma2014adam}. (See the notebooks for more details.)
+
+    \item \textbf{Transformer} We once again start by embedding the characters. We next also estimate the positional encodings before passing on two transformer layers and a log softmax. The other details are the same as in LSTM. (See the notebooks for more details.)
+    
     \end{itemize}
 
 \section*{Results}
 
-Table \ref{table:oos_last_name_perf} presents some metrics that shed light on how well we did with the last-name model in predicting race OOS using the Florida Voter Registration Data. The OOS precision is .79, recall is .81, and the f1-score, the harmonic mean of precision and recall, is .78. There is however sizable variation in recall across different racial and ethnic groups. For instance, recall is .95 for whites and just .21 for non-Hispanic blacks.
+Table \ref{table:oos_last_name_perf} presents some metrics tracking performance of the last-name model on the holdout set in Florida Voter Registration Data. The OOS precision and recall of the KNN model is .76 and .78 respectively. There is however sizable variation in recall across different racial and ethnic groups. For instance, recall is .90 for whites and just .38 for non-Hispanic blacks. 
 
 \input{tabs/ln_perf}
 
@@ -168,20 +169,42 @@ Voter registration data has many limitations. First, not everyone is registered 
 \begin{table}[h!]
 \centering
 \caption{Performance of the KNN (K = 5) Cosine Distance model on the test set.}
-\begin{tabular}{lrrrr}
+\begin{tabular}{lllrr}
 \hline
-               &   precision &   recall &   f1-score &   support \\
+              & precision   & recall   &   f1-score &   support \\
 \hline
-   asian      & 0.48    &  0.18 &     0.27  &    1,557\\
-     hispanic   &    0.85   &   0.76   &   0.80   &  10,707\\
- multi\_racial   &    0.08   &   0.00   &   0.01  &     368\\
-native\_indian   &    0.50  &    0.01   &   0.02  &     121\\
-     nh\_black   &    0.57  &    0.37   &   0.45  &    4,384\\
-     nh\_white   &    0.78   &   0.92   &   0.84  &   25,669\\
-        other   &    0.14   &   0.02   &   0.03   &    627\\
- weighted\_avg   &    0.75   &   0.77   &   0.75  &   43,433\\
+ asian        & 0.47        & 0.19     &       0.27 &      1,812 \\
+ hispanic     & 0.88        & 0.82     &       0.85 &     16,243 \\
+ nh\_black     & 0.56        & 0.38     &       0.45 &      5,145 \\
+ nh\_white     & 0.77        & 0.90     &       0.83 &     28,183 \\
+ other        & 0.22        & 0.04     &       0.07 &      1,450 \\
+              &             &          &            &           \\
+ accuracy     & -           & -        &       0.78 &     52,833 \\
+ macro\_avg    & 0.58        & 0.47     &       0.49 &     52,833 \\
+ weighted\_avg & 0.76        & 0.78     &       0.76 &     52,833 \\
 \hline
 \label{table:knn_last_name}
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the KNN (K = 10) LSH Minhash Jaccard Distance model on the test set.}
+\begin{tabular}{lllrr}
+\hline
+              & precision   & recall   &   f1-score &   support \\
+\hline
+ asian        & 0.64        & 0.18     &       0.28 &     25,756 \\
+ hispanic     & 0.72        & 0.65     &       0.68 &    163,525 \\
+ nh\_black     & 0.58        & 0.31     &       0.4  &    133,471 \\
+ nh\_white     & 0.75        & 0.91     &       0.82 &    552,737 \\
+ other        & 0.30        & 0.02     &       0.03 &     26,373 \\
+              &             &          &            &           \\
+ accuracy     & -           & -        &       0.73 &    901,862 \\
+ macro\_avg    & 0.60        & 0.41     &       0.44 &    901,862 \\
+ weighted\_avg & 0.70        & 0.73     &       0.7  &    901,862 \\
+\hline
+\label{table:knn_full_name}
 \end{tabular}
 \end{table}
 
@@ -191,16 +214,19 @@ native\_indian   &    0.50  &    0.01   &   0.02  &     121\\
 \begin{table}[h!]
 \centering
 \caption{Performance of the Last Name Random Forest model on the test set.}
-\begin{tabular}{lrrrr}
+\begin{tabular}{lllrr}
 \hline
-              &   precision &   recall &   f1-score &   support \\
+              & precision   & recall   &   f1-score &   support \\
 \hline
- asian        &        0.09 &     0.05 &       0.06 &      6,867 \\
- hispanic     &        0.69 &     0.66 &       0.68 &     38,961 \\
- nh\_black     &        0.34 &     0.17 &       0.23 &     13,726 \\
- nh\_white     &        0.6  &     0.73 &       0.66 &     60,970 \\
- other        &        0.17 &     0.15 &       0.16 &     14,374 \\
- weighted\_avg &        0.53 &     0.56 &       0.54 &    134,898 \\
+ asian        & 0.62        & 0.17     &       0.26 &      3,648 \\
+ hispanic     & 0.86        & 0.83     &       0.85 &     32,461 \\
+ nh\_black     & 0.69        & 0.26     &       0.38 &     10,403 \\
+ nh\_white     & 0.76        & 0.93     &       0.83 &     56,262 \\
+ other        & 0.30        & 0.01     &       0.03 &      2,890 \\
+              &             &          &            &           \\
+ accuracy     & -           & -        &       0.78 &    105,664 \\
+ macro\_avg    & 0.65        & 0.44     &       0.47 &    105,664 \\
+ weighted\_avg & 0.76        & 0.78     &       0.75 &    105,664 \\
 \hline
 \label{table:rf_last_name}
 \end{tabular}
@@ -208,24 +234,23 @@ native\_indian   &    0.50  &    0.01   &   0.02  &     121\\
 
 \begin{table}[h!]
 \centering
-\caption{Performance of the Full Name Random Forest model trained on 2M records on the test set.\textsuperscript{*}}
-\begin{tabular}{lrrrr}
+\caption{Performance of the Full Name Random Forest model on the test set.}
+\begin{tabular}{lllrr}
 \hline
-              &   precision &   recall &   f1-score &   support \\
+              & precision   & recall   &   f1-score &   support \\
 \hline
- asian        &      0.63  &    0.17   &   0.27  &   27,829\\
- hispanic     &        0.78 &     0.66 &       0.72 &    169,058 \\
- nh\_black     &        0.66 &     0.25 &       0.36 &    149,299 \\
- nh\_white     &        0.72 &     0.94 &       0.81 &    573,470 \\
- other        &        0.12 &     0.02 &       0.03 &     40,192 \\
- weighted\_avg &        0.69 &     0.72 &       0.68 &    959,848 \\
+ asian        & 0.79        & 0.19     &       0.31 &     25,756 \\
+ hispanic     & 0.84        & 0.72     &       0.77 &    163,525 \\
+ nh\_black     & 0.83        & 0.27     &       0.41 &    133,471 \\
+ nh\_white     & 0.75        & 0.97     &       0.84 &    552,737 \\
+ other        & 0.41        & 0.00     &       0.01 &     26,373 \\
+              &             &          &            &           \\
+ accuracy     & -           & -        &       0.77 &    901,862 \\
+ macro\_avg    & 0.72        & 0.43     &       0.47 &    901,862 \\
+ weighted\_avg & 0.77        & 0.77     &       0.73 &    901,862 \\
 \hline
-\multicolumn{5}{l}{\textit{Note:} We decided on 2M records because of computational}\\
-\multicolumn{5}{l}{constraints and because the performance of the model}\\
-\multicolumn{5}{l}{trained on 2M records was very close to the performance}\\
-\multicolumn{5}{l}{of the model trained on 1M records.}
+\label{table:rf_full_name}
 \end{tabular}
-\label{table:rf_full_name_2m}
 \end{table}
 
 \clearpage
@@ -234,16 +259,19 @@ native\_indian   &    0.50  &    0.01   &   0.02  &     121\\
 \begin{table}[h!]
 \centering
 \caption{Performance of the Last Name Gradient Boosted Trees model on the test set.}
-\begin{tabular}{lrrrr}
+\begin{tabular}{lllrr}
 \hline
-              &   precision &   recall &   f1-score &   support \\
+              & precision   & recall   &   f1-score &   support \\
 \hline
- asian       &   0.53       &     0.03 &        0.05 &     6,867\\
- hispanic     &        0.78 &     0.67 &       0.72 &     38,961 \\
- nh\_black     &        0.62 &     0.08 &       0.15 &     13,726 \\
- nh\_white     &        0.56 &     0.92 &       0.7  &     60,970 \\
- other        &        0.35 &     0    &       0    &     14,374 \\
- weighted\_avg &        0.61 &     0.62 &       0.54 &    134,898 \\
+ asian        & 0.67        & 0.07     &       0.13 &      3,648 \\
+ hispanic     & 0.83        & 0.80     &       0.81 &     32,461 \\
+ nh\_black     & 0.64        & 0.12     &       0.2  &     10,403 \\
+ nh\_white     & 0.73        & 0.93     &       0.81 &     56,262 \\
+ other        & 0.34        & 0.01     &       0.01 &      2,890 \\
+              &             &          &            &           \\
+ accuracy     & -           & -        &       0.75 &    105,664 \\
+ macro\_avg    & 0.64        & 0.39     &       0.4  &    105,664 \\
+ weighted\_avg & 0.74        & 0.75     &       0.71 &    105,664 \\
 \hline
 \label{table:gb_last_name}
 \end{tabular}
@@ -251,24 +279,23 @@ native\_indian   &    0.50  &    0.01   &   0.02  &     121\\
 
 \begin{table}[h!]
 \centering
-\caption{Performance of the Full Name Gradient Boosted Trees model learned on 2M examples on the test set}
-\begin{tabular}{lrrrr}
+\caption{Performance of the Full Name Gradient Boosted Trees model on the test set}
+\begin{tabular}{lllrr}
 \hline
-              &   precision &   recall &   f1-score &   support \\
+              & precision   & recall   &   f1-score &   support \\
 \hline
- asian        &        0.73 &     0.1  &       0.17 &     27,829 \\
- hispanic     &        0.75 &     0.53 &       0.62 &    169,058 \\
- nh\_black     &        0.76 &     0.08 &       0.14 &    149,299 \\
- nh\_white     &        0.67 &     0.96 &       0.79 &    573,470 \\
- other        &        0.43 &     0    &       0.01 &     40,192 \\
- weighted\_avg &        0.69 &     0.68 &       0.61 &    959,848 \\
+ asian        & 0.86        & 0.04     &       0.08 &     25,756 \\
+ hispanic     & 0.82        & 0.40     &       0.54 &    163,525 \\
+ nh\_black     & 0.77        & 0.01     &       0.03 &    133,471 \\
+ nh\_white     & 0.66        & 0.98     &       0.79 &    552,737 \\
+ other        & 0.38        & 0.00     &       0    &     26,373 \\
+              &             &          &            &           \\
+ accuracy     & -           & -        &       0.68 &    901,862 \\
+ macro\_avg    & 0.70        & 0.29     &       0.29 &    901,862 \\
+ weighted\_avg & 0.70        & 0.68     &       0.59 &    901,862 \\
 \hline
-\multicolumn{5}{l}{\textit{Note:} We decided on 2M records because of computational}\\
-\multicolumn{5}{l}{constraints and because the performance of the model}\\
-\multicolumn{5}{l}{trained on 2M records was very close to the performance}\\
-\multicolumn{5}{l}{of the model trained on 1M records.}
 \end{tabular}
-\label{table:gb_full_name_2m}
+\label{table:gb_full_name}
 \end{table}
 
 \singlespacing
@@ -281,16 +308,19 @@ native\_indian   &    0.50  &    0.01   &   0.02  &     121\\
 \begin{table}[h!]
 \centering
 \caption{Performance of the Last Name LSTM model on the test set.}
-\begin{tabular}{llrrrr}
+\begin{tabular}{lllrr}
 \hline
-          & precision   &    recall &   f1-score &   support \\
+              & precision   & recall   &   f1-score &   support \\
 \hline
- asian    & 0.41        &      0.19 &       0.26 &   6,859    \\
- hispanic & 0.83        &      0.7  &       0.76 &  38,927    \\
- nh\_black & 0.59        &      0.4  &       0.48 &  13,719    \\
- nh\_white & 0.62        &      0.87 &       0.72 &  60,919    \\
- other    & 0.27        &      0.09 &       0.13 &  14,360    \\
- weighted\_avg   &      0.63 &       0.65 & 0.62 & 134,784\\
+ asian        & 0.55        & 0.41     &       0.47 &      3,647 \\
+ hispanic     & 0.89        & 0.85     &       0.87 &     32,445 \\
+ nh\_black     & 0.67        & 0.51     &       0.58 &     10,399 \\
+ nh\_white     & 0.81        & 0.92     &       0.86 &     56,221 \\
+ other        & 0.42        & 0.04     &       0.08 &      2,888 \\
+              &             &          &            &           \\
+ accuracy     & -           & -        &       0.81 &    105,600 \\
+ macro\_avg    & 0.67        & 0.55     &       0.57 &    105,600 \\
+ weighted\_avg & 0.80        & 0.81     &       0.8  &    105,600 \\
 \hline
 \label{table:lstm_last_name}
 \end{tabular}
@@ -299,16 +329,19 @@ native\_indian   &    0.50  &    0.01   &   0.02  &     121\\
 \begin{table}[h!]
 \centering
 \caption{Performance of the Full Name LSTM model on the test set.}
-\begin{tabular}{llrrrr}
+\begin{tabular}{lllrr}
 \hline
-          & precision   &    recall &   f1-score &   support \\
+              & precision   & recall   &   f1-score &   support \\
 \hline
- asian    & 0.65        &      0.57 &       0.61 &  27,827    \\
- hispanic & 0.79        &      0.83 &       0.81 & 169,038    \\
- nh\_black & 0.73        &      0.69 &       0.71 & 149,283    \\
- nh\_white & 0.85        &      0.9  &       0.88 & 573,409    \\
- other    & 0.39        &      0.08 &       0.13 &  40,187    \\
- weighted avg       &   0.8  &       0.81 &      0.8 & 959,744 \\
+ asian        & 0.65        & 0.63     &       0.64 &     25,752 \\
+ hispanic     & 0.85        & 0.86     &       0.85 &    163,505 \\
+ nh\_black     & 0.78        & 0.75     &       0.76 &    133,458 \\
+ nh\_white     & 0.89        & 0.93     &       0.91 &    552,675 \\
+ other        & 0.40        & 0.07     &       0.12 &     26,370 \\
+              &             &          &            &           \\
+ accuracy     & -           & -        &       0.85 &    901,760 \\
+ macro\_avg    & 0.71        & 0.65     &       0.66 &    901,760 \\
+ weighted\_avg & 0.84        & 0.85     &       0.84 &    901,760 \\
 \hline
 \label{table:lstm_full_name}
 \end{tabular}
@@ -320,16 +353,19 @@ native\_indian   &    0.50  &    0.01   &   0.02  &     121\\
 \begin{table}[h!]
 \centering
 \caption{Performance of the Last Name Transformer model on the test set.}
-\begin{tabular}{llrrrr}
+\begin{tabular}{lllrr}
 \hline
-          & precision   &   recall &   f1-score &   support \\
+              & precision   & recall   &   f1-score &   support \\
 \hline
-  asian      &  0.45     &  0.01    &   0.01   &    6,860\\
- hispanic & 0.77        &     0.66 &       0.71 &  38,936    \\
- nh\_black & 0.47        &     0.07 &       0.12 &  13,717    \\
- nh\_white & 0.56        &     0.91 &       0.69 &  60,910    \\
- other    & 0.00        &     0    &       0    &  14,361    \\
- weighted\_avg  &      0.55 &       0.61 &      0.53 & 134,784 \\
+ asian        & 0.38        & 0.03     &       0.06 &      3,646 \\
+ hispanic     & 0.80        & 0.80     &       0.8  &     32,431 \\
+ nh\_black     & 0.48        & 0.09     &       0.16 &     10,398 \\
+ nh\_white     & 0.72        & 0.91     &       0.8  &     56,236 \\
+ other        & 0.00        & 0.00     &       0    &      2,889 \\
+              &             &          &            &           \\
+ accuracy     & -           & -        &       0.74 &    105,600 \\
+ macro\_avg    & 0.48        & 0.37     &       0.36 &    105,600 \\
+ weighted\_avg & 0.69        & 0.74     &       0.69 &    105,600 \\
 \hline
 \label{table:transformer_last_name}
 \end{tabular}
@@ -338,16 +374,19 @@ native\_indian   &    0.50  &    0.01   &   0.02  &     121\\
 \begin{table}[h!]
 \centering
 \caption{Performance of the Full Name Transformer model on the test set.}
-\begin{tabular}{lrrrr}
+\begin{tabular}{lllrr}
 \hline
-              &   precision &   recall &   f1-score &   support \\
+              & precision   & recall   &   f1-score &   support \\
 \hline
-  asian      & 0.62  &    0.09  &    0.16    & 27,824\\
- hispanic     &        0.66 &     0.51 &       0.57 &    169,041 \\
- nh\_black     &        0.49 &     0.04 &       0.07 &    149,283 \\
- nh\_white     &        0.66 &     0.94 &       0.78 &    573,408 \\
- other        &        0    &     0    &       0    &     40,188 \\
- weighted\_avg &        0.61 &     0.66 &       0.58 &    959,744 \\
+ asian        & 0.56        & 0.25     &       0.34 &     25,753 \\
+ hispanic     & 0.67        & 0.67     &       0.67 &    163,509 \\
+ nh\_black     & 0.51        & 0.24     &       0.33 &    133,451 \\
+ nh\_white     & 0.74        & 0.89     &       0.81 &    55,2674 \\
+ other        & 0.28        & 0.00     &       0.01 &     26,373 \\
+              &             &          &            &           \\
+ accuracy     & -           & -        &       0.71 &    901,760 \\
+ macro\_avg    & 0.55        & 0.41     &       0.43 &    901,760 \\
+ weighted\_avg & 0.67        & 0.71     &       0.67 &    901,760 \\
 \hline
 \label{table:transformer_full_name}
 \end{tabular}
