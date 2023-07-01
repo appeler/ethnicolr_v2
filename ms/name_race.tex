@@ -45,8 +45,9 @@
 
 \title{\Large{Predicting Race and Ethnicity From the\\Sequence of Characters in a Name}\footnote{Data and scripts behind the analysis presented here can be downloaded from \url{http://github.com/appeler/ethnicolr_v2}. This paper is a new version of \citet{sood2018predicting}.}}
 
-\author{Rajashekar Chintalapati\thanks{Rajashekar can be reached at \href{mailto:rajshekar.ch@gmail.com}\texttt{rajshekar.ch@gmail.com}} \and Gaurav Sood\thanks{Gaurav can be reached at \href{mailto:gsood07@gmail.com}\texttt{gsood07@gmail.com}}
-\and Suriyan Laohaprapanon\thanks{Suriyan can be reached at: \href{mailto:suriyant@gmail.com}\texttt{suriyant@gmail.com}}}
+\author{Rajashekar Chintalapati\thanks{Rajashekar can be reached at \href{mailto:rajshekar.ch@gmail.com}\texttt{rajshekar.ch@gmail.com}} 
+\and Suriyan Laohaprapanon\thanks{Suriyan can be reached at: \href{mailto:suriyant@gmail.com}\texttt{suriyant@gmail.com}}
+\and Gaurav Sood\thanks{Gaurav can be reached at \href{mailto:gsood07@gmail.com}\texttt{gsood07@gmail.com}}}
 
 \date{\vspace{.5cm}\normalsize{\today}}
 
@@ -54,25 +55,25 @@
 \maketitle
 
 \begin{abstract}
-To answer questions about racial inequality, we often need a way to infer race and ethnicity from a name. Until now, the bulk of the focus has been on optimally exploiting the last names list provided by the Census Bureau. But first names contain more information, especially for African Americans. To estimate the relationship between full names and race, we exploit Florida Voter Registration Data which includes self-reported race and ethnicity. We model the relationship between characters in a name and race and ethnicity using various techniques. We find that a model using Long Short-Term Memory works best with out-of-sample (OOS) precision and recall of .80 and .81 respectively. The equivalent numbers for the last name only model are .63 and .65. To illustrate the use of this method, we apply our method to campaign finance data to estimate the share of donations made by people of various racial groups and coverage of various races and ethnicities in the news.
+To answer questions about racial inequality and fairness, we often need a way to infer race and ethnicity from names. One way to infer race and ethnicity from names is by relying on the Census Bureau's list of popular last names. The list, however, suffers from at least three limitations: 1. it only contains last names, 2. it only includes popular last names, and 3. it is updated once every 10 years. To provide better generalization, and higher accuracy when first names are available, we model the relationship between characters in a name and race and ethnicity using various techniques. A model using Long Short-Term Memory works best with out-of-sample accuracy of .85. The best-performing last-name model achieves out-of-sample accuracy of .81. To illustrate the utility of the models, we apply them to campaign finance data to estimate the share of donations made by people of various racial groups, and to news data to estimate the coverage of various races and ethnicities in the news.
 \end{abstract}
 \clearpage
 \doublespace
 
-How often are people of different races and ethnicities covered in the news? What percentage of campaign contributions come from African Americans? Are there racial gaps in healthcare delivery? Do minorities face discrimination in borrowing? To answer such questions, we often need a way to infer race and ethnicity from names. Given the important questions at stake, a number of researchers have worked on inferring race from names \citep[see, e.g.,][]{ambekar2009name, fiscella2006use, imai2016improving, rosenman2022race}. We contribute to the substantial literature.
+How often are people of different races and ethnicities covered in the news? What percentage of campaign contributions come from African Americans? Are there racial gaps in healthcare delivery? Do minorities face discrimination in borrowing? To answer such questions, we often need a way to infer race and ethnicity from names. Given the important questions at stake, a number of researchers have worked on methods to infer race from names \citep[see, e.g.,][]{ambekar2009name, fiscella2006use, imai2016improving, rosenman2022race}. We contribute to this substantial literature.
 
 \section*{Inferring Race and Ethnicity from Names}
 
-\subsection*{Approaches} Researchers have used a variety of approaches to infer race and ethnicity from names. Some researchers have taken advantage of the list of popular last names provided by the Census Bureau \citep[see, e.g.,][]{fiscella2006use}. The approach suffers from two weaknesses---a biased small set of popular names, and a lack of first names. The information in the first name is especially vital for African Americans, whose last names are hard to distinguish from non-Hispanic whites, and whose first names tend to be distinctive \citep{bertrand2004emily}. Others have harvested Wikipedia data on names and their national origins and used crude features of names to build a national origins classifier \citep{ambekar2009name}. The Wikipedia data is small and suffers from a strong bias toward names of popular people. Still others have used private data and homophily to predict national origin \citep{ye2017nationality}. The limitation here is that the data are private. Still others like us use voter registration data \citep{sood2018predicting, parasurama2021racebert}. The voter registration data also has its own tradeoffs.\footnote{There is a parallel literature that combines voter registration data with census data to infer race where we have the name and location of a person \citep[see for e.g.,]{imai2016improving, kotovadeep}.} There is labeled data from only a few states, and not everyone is registered to vote.
+\subsection*{Approaches} Researchers have used a variety of approaches to infer race and ethnicity from names. Some researchers have taken advantage of the Census Bureau's list of popular last names \citep[see, e.g.,][]{fiscella2006use}. The approach suffers from three weaknesses---a biased small set of popular last names, a lack of first names, and a decennial update cadence. The information in the first name is especially vital for accurately identifying African Americans, whose last names are hard to distinguish from non-Hispanic whites, and whose first names tend to be distinctive \citep{bertrand2004emily}. Others have harvested Wikipedia data on names and their national origins and used crude features of names to build a national origins classifier \citep{ambekar2009name}. The downside of Wikipedia is that the database is small and suffers from a strong bias toward popular people. Yet others have used private communication data and homophily to predict national origin \citep{ye2017nationality}. The limitation here is that the data are private. Lastly, some researchers like us have used voter registration data \citep{sood2018predicting, parasurama2021racebert}.\footnote{There is a parallel literature that combines voter registration data with census data to infer race where we have the name and location of a person \citep[see for e.g.,]{imai2016improving, kotovadeep}.} The voter registration data also has its own tradeoffs. Primarily, the voter registration data which includes the race of the voter is published by a few states, the race variable is often crudely coded, and not everyone is registered to vote. These issues create concerns about its generalizability.
 
-\subsection*{Estimand} We predict the modal race and ethnicity of people with a particular name. In the SI, we show results from two more models. The first model predicts the probability distribution. The second model predicts all the most popular racial categories that make up at least 90\% of the people with the name.
+\subsection*{Estimand} We predict the modal race and ethnicity of people with a particular name. In the SI, we show results from a model that predicts the probability distribution. 
 
-\subsection*{Measurement of Race and Ethnicity} Florida Voter Registration data provide self-reported race and ethnicity of people. Even though race and ethnicity are self-reported, the limitations of the reporting instrument mean that the quality of the data is debatable. For one, Florida Voter Registration data treats race and ethnicity as one dimension with Hispanic treated as one category. Second, the instrument only allows crude categorization. For instance, Indian Americans are grouped under Asian and Pacific Islanders. 
-
-\subsection*{Why Model?} If you picked a random individual with last name Smith from the US in 2010 and asked us to guess this person's race (measured as crudely as by the census), the best guess would be based on what is available from the aggregated Census file. It is the Bayes optimal solution. So what good are last name only predictive models for? A few things. If you want to impute ethnicity at a more granular level, guess the race of people in different years (than when the census was conducted if some assumptions hold), guess the race of people in different countries (again if some assumptions hold), when names are slightly different (again with some assumptions), etc.
+\subsection*{Why Model?} If you picked a person at random with the last name Smith from the US in 2010 and were asked to guess this person's race (as measured by the census), the best guess would be based on what is available from the aggregated Census popular last names file. It is the Bayes optimal solution. So what good are last-name predictive models for? Primarily two things. First, the model is useful to predict the race and ethnicity of people whose names are not in the popular last names list. Second, it can be useful in predicting the race and ethnicity of names in databases where names have spelling errors, etc.
 
 \section*{Data}
-We exploit Florida Voting Registration data for the year 2022 \citep{sood_2017}. The Florida Voting Registration has information on nearly 15M voters along with their race. Given that we have very few people who identify as multi-racial and Native American, we condense them into Other. Our final dataset only has five categories: Asian/Pacific Islander, Hispanic, Non-Hispanic Blacks, Non-Hispanic Whites, and Other (see Table \ref{table:fl_data}). 
+We exploit Florida Voting Registration data for the year 2022 \citep{sood_2017}. The Florida Voting Registration has information on nearly 15M voters along with their self-reported race. Even though race and ethnicity are self-reported, the limitations of the reporting instrument mean that the quality of the data is debatable. For one, Florida Voter Registration data treats race and ethnicity as one dimension with Hispanic treated as one category. Second, the instrument only allows crude categorization. For instance, Indian Americans are grouped under Asian and Pacific Islanders. In all, we have a self-reported race variable that takes 7 values: Non-Hispanic White, Non-Hispanic Black, Hispanic, Asian or Pacific Islander, Native American, Multi-racial, and Unknown. 
+
+There are very few cases of people not providing their race or ethnicity. We assume that the data are missing at random and remove them from our data. Given that we have very few people who identify as multi-racial and Native American, we condense them into Other. Our final dataset has five categories: Asian/Pacific Islander, Hispanic, Non-Hispanic Blacks, Non-Hispanic Whites, and Other (see Table \ref{table:fl_data}). 
 
 \begin{table}[h!]
 \centering
@@ -81,69 +82,49 @@ We exploit Florida Voting Registration data for the year 2022 \citep{sood_2017}.
 \hline    
 race & n \\
 \hline
-asian & 253,808 \\
-hispanic & 2,179,106 \\
-nh black & 1,853,690 \\
-nh white & 8,757,268 \\
+nh\_white  &       9,446,770 \\
+hispanic   &       2,722,579 \\
+nh\_black  &       2,086,582 \\
+asian      &       329,034 \\
+other      &       424308 \\
 \hline
 \end{tabular}
 \label{table:fl_data}
 \end{table}
 
-To derive some baselines, we also use the Census Bureau last name data \citep{census2010}. The Census Bureau provides the frequency of all surnames occurring 100 or more times for the 2000 and 2010 census. Technical details of how the 2000 and 2010 data were collected can be found on the census website. 
+In addition to the Florida Voter Registration data, we also use the Census Popular Last Name Data \citep{census2010} and the North Carolina Voter Registration Data. 
 
-We can use the Wikipedia data and the Florida Voting Registration data as is but the Census data needs to be transformed before being used. The dataset that the Census Bureau issues aggregates data for each last name and provides the percentage of people with the last name who are Black, White, Asian, Hispanic, etc. Given some names are more common than others (2,442,977 Americans had the last name Smith in 2010 according to the Census Bureau), and given our interest in modeling the population distribution, we take a weighted random sample from this data with weight equal to how common the last name is in the population. We assign the floor of \texttt{pctwhite} as proportion white, the floor of \texttt{pctblacks} as proportion black, etc. (Since we are using the floor, we lose a few observations but we ignore this drop off.) We use this as the final dataset.
+\section*{Models}
+We try models of all degrees of sophistication starting with an edit distance based KNN model. We follow that by representing names as `Bag of Characters' and learning the relationship with ethno-racial categories using Random Forests and Gradient Boosted Trees. Lastly, we model the relationship between the sequence of characters and categories using LSTM and Transformer models. For last names for which we have much more limited data, we also try an LSTM model that leverages synthetic data. 
 
-\section*{Model and Validation}
-To learn the association between the sequence of characters in names and race and ethnicity, we estimate an LSTM model \citep{graves2005framewise, gers1999learning} on approximately 1M randomly sampled names from the Florida Voter Registration Data and all the valid rows (n = 133,872) in the Wikipedia data. We estimate the last name model on a title case transformed version of the last name. For the full name model, we concatenate the last name and first name (ignoring the middle name) and again capitalize each word. We split the strings (last name or last name and first name) into two character chunks (bi-chars). For instance, Smith becomes {\tt Sm, mi, it, th}. Next, we remove infrequent bi-chars (occurring less than 3 times in the data) and very frequent bi-chars (occurring in over 30\% of the sequences in the data). We use the remaining bi-chars as our vocabulary. In the Florida Voting Registration Data, this leaves us with 1,146 bi-chars in the case of last name only data, and 1,604 bi-chars in the full name data. In the Wikipedia data, the corresponding numbers are 1,946 and 2,260. Next, we pad the sequences so that they are the same size. Finally, we use 20 as the window size for the last name only model and 25 for the full name model. 
+We estimate the last name model on a title case transformed version of the last name. For the full name model, we concatenate the last name and first name (ignoring the middle name) and again capitalize each word. 
 
-On this set of sequences, we train a LSTM model using Keras \citep{chollet2015keras} and TensorFlow \citep{abadi2016tensorflow}. Before estimating the LSTM model, we embed each of the words onto a 32 length real-valued vector. We then estimate a LSTM with a .2 dropout and .2 recurrent dropout for regularization \citep{srivastava2014dropout}. The last layer is a dense layer with a softmax activation. Because it is a classification problem, we use log loss as the loss function. And we use ADAM for optimization \citep{kingma2014adam}. We fit the model for 15 epochs with a batch size of 32.
+To learn all the classifiers except for KNN, which doesn't have a conventional training set, we split the corpus into train, validation, and test sets with proportions of .8, .1, and .1 respectively. We remove rows where the last name and first name are missing, where the last name is just 1 character. We also filter the rows where the race is unknown, assuming that the race is missing at random. We then group data by last name or full name and get the conditional means for each of the five ethno-racial categories and find the modal race. 
 
-Table \ref{table:last_name_fl_voter_reg} presents some metrics that shed light on how well we did with the last name only model in predicting race OOS using the Florida Voter Registration Data. The OOS precision is .79, recall is .81, and f1-score, the harmonic mean of precision and recall, is .78. There is however sizable variation in recall across different racial and ethnic groups. For instance, recall is .95 for whites and just .21 for non-Hispanic blacks.\footnote{You see the same pattern when we estimate the model on the Census last name data. Recall for blacks on the model estimated on both the 2000 and 2010 Census last name data is .09 and .07 respectively (see Table \ref{table:last_name_census_2000} and Table \ref{table:last_name_census_2010}).}
+\begin{itemize}
 
-\begin{table}[h!]
-\centering
-\caption{OOS Performance of the Last Name LSTM Model on the Florida Voter Registration Data.}
-\begin{tabular}{ l c c c c }
-\hline    
-    race & precision & recall & f1-score & support \\
-\hline
-      asian &       0.77 &      0.41 &      0.54 &      4,527 \\
-   hispanic &       0.74 &      0.70 &      0.72 &     18,440 \\
-   nh black &       0.64 &      0.21 &      0.32 &     28,586 \\
-   nh white &       0.82 &      0.95 &      0.88 &    146,009 \\
+    \item \textbf{KNN} If we had a census of all the names, and the name was the only data we had about a person, then the Bayes Optimal Classifier for predicting the race of the person with that name is the racial category with the largest probability density. As we noted above, this data is not available. Assuming we do not have the full list of names or that names can have spelling errors, the next simplest classifier is an edit-distance-based classifier. We use a bi-char-based distance metric to estimate a KNN classifier. We split the data into the lookup corpus, a validation set that allows us to choose the optimal $k$, and a test set to see if the results generalize. For the last name model, we use cosine distance. For computational reasons, for the full name model, we use the Jaccard distance via LSH Minhash for 80\% of the training set.
 
-avg / total &       0.79 &      0.81 &      0.78 &    197,562 \\
+    \item \textbf{RF and GB} We use a bag of char and bi-char representation of names to learn the relationship between names and ethno-racial categories. We split the strings (last name or last name and first name) into two character chunks (bi-chars). For instance, Smith becomes {\tt Sm, mi, it, th}. Next, we remove infrequent bi-chars (occurring less than 3 times in the data) and very frequent bi-chars (occurring in over 30\% of the sequences in the data). For the precise hyperparameters, please refer to the notebooks.
+    
+    \item \textbf{LSTM} To learn the association between the sequence of characters in names and race and ethnicity, we estimate an LSTM model \citep{graves2005framewise, gers1999learning} on the Florida Voter Registration Data. On this set of sequences, we train an LSTM model. Before estimating the LSTM model, we embed each of the words onto a 32-length real-valued vector. We then estimate the LSTM with a .2 dropout and .2 recurrent dropout for regularization \citep{srivastava2014dropout}. The last layer is a dense layer with a log softmax activation. Because it is a classification problem, we use log loss as the loss function. And we use ADAM for optimization \citep{kingma2014adam}. We fit the model for 15 epochs with a batch size of 32.
+    \end{itemize}
 
-\hline
-\end{tabular}
-\label{table:last_name_fl_voter_reg}
-\end{table}
+\section*{Results}
 
-Compared to the last name only model, we do much better with a full name model. The OOS precision, recall, and f1-score for the full name model is .83, .84, and .83 respectively (see Table \ref{table:full_name_fl_voter_reg}). The gains are, however, asymmetric. Recall is considerably better for Asians and Non-Hispanic blacks with the full name---.49 and .43 respectively, compared to .41 and .21 respectively. The precision with which we predict non-Hispanic Blacks is also considerably higher---it is 9 points higher for the full name model. Given Asians and Hispanics have more distinctive last names, the improvement in precision in predicting both is smaller---negligible in the case of Asians and 2 points in the case of Hispanics.
+Table \ref{table:oos_last_name_perf} presents some metrics that shed light on how well we did with the last-name model in predicting race OOS using the Florida Voter Registration Data. The OOS precision is .79, recall is .81, and the f1-score, the harmonic mean of precision and recall, is .78. There is however sizable variation in recall across different racial and ethnic groups. For instance, recall is .95 for whites and just .21 for non-Hispanic blacks.
 
-\begin{table}[h!]
-\centering
-\caption{OOS Performance of the Full Name LSTM Model on the Florida Voter Registration Data.}
-\begin{tabular}{ l c c c c }
-\hline    
-   race & precision & recall & f1-score & support\\
-\hline
-      asian &        0.77 &       0.49 &       0.60 &       4,527\\
-   hispanic &        0.76 &       0.73 &       0.75 &      18,440\\
-   nh black &        0.73 &       0.43 &       0.55 &      28,586\\
-   nh white &        0.86 &       0.95 &       0.90 &     146,009\\
+\input{tabs/ln_perf}
 
-avg / total &        0.83 &       0.84 &       0.83 &     197,562\\
-\hline
-\end{tabular}
-\label{table:full_name_fl_voter_reg}
-\end{table}
+Compared to the last-name model, we do much better with a full-name model. The OOS precision, recall, and f1-score for the full name model are .83, .84, and .83 respectively (see Table \ref{table:oos_full_name_perf}). The gains are, however, asymmetric. The recall is considerably better for Asians and Non-Hispanic blacks with the full name---.49 and .43 respectively, compared to .41 and .21 respectively. The precision with which we predict non-Hispanic Blacks is also considerably higher---it is 9 points higher for the full name model. Given Asians and Hispanics have more distinctive last names, the improvement in precision in predicting both is smaller---negligible in the case of Asians and 2 points in the case of Hispanics.
+
+\input{tabs/fn_perf}
+
 
 \section*{Application}
-To illustrate the utility of the models that we have developed here, we impute the race and ethnicity of individual campaign contributors in the 2000 and 2010 campaign contribution databases \citep{bonica2017database} using just the Census last name data and the Florida full name model. We then use the inferred race and ethnicity to estimate the proportion of total contributions made by people of different races. 
+To illustrate the utility of the models we have developed here, we impute the race and ethnicity of individual campaign contributors in the 2014 campaign contribution databases \citep{bonica2017database} using just the Census last name data and the Florida full name model. We then use the inferred race and ethnicity to estimate the proportion of total contributions made by people of different races. 
 
-Based on the census last name data, in 2010, about 83.5\% of the contributions were made by Whites (see Table \ref{table:percentage_contrib_by_race}). But the commensurate number based on the Florida full name model was nearly 3\% more, 86.5\%. Moving to blacks, we see a similar story. Based on the census last name data, about 10.2\% of the contributed money came from blacks. But based on Florida full name model, the number is about 2.3\% lower, or a hefty 22.2\% relative change. The commensurate difference in estimated contributions by Hispanics is about 1\% or about 33\% relative change. Among Asians, the commensurate difference is about .5\% points or about 18\% relative change. A similar pattern holds for 2000. We see that the share of contributions made by Whites is smaller based on the Census last name data than the Florida full name model.
+Based on the census last name data, in 2010, about 83.5\% of contributions were made by Whites (see Table \ref{table:percentage_contrib_by_race}). But the commensurate number calculated using the Florida full name model was nearly 3\% more, 86.5\%. Moving to blacks, we see a similar story. Based on census last name data about 10.2\% of contributions came from blacks. But based on Florida's full name model, the number is about 2.3\% lower, or a 22.2\% relative change. The commensurate difference in estimated contributions by Hispanics is about 1\% or about 33\% relative change. Among Asians, the commensurate difference is about .5\% points or about 18\% relative change. A similar pattern holds for 2000. We see that Whites contribute less based on Census last name data than Florida full name model.
 
 \begin{table}[h!]
 \centering
@@ -158,17 +139,16 @@ asian    &     2.22\%   & 2.74\%   &   2.00\%   & 2.28\%\\
 black    &     11.04\%  & 10.22\%  &   8.93\%   & 7.92\%\\
 hispanic &     3.24\%   & 4.32\%   &   3.23\%   & 3.31\%\\
 white    &     83.49\%  & 82.71\%  &   85.84\%  & 86.49\%\\
+other    &     83.49\%  & 82.71\%  &   85.84\%  & 86.49\%\\
 \hline
 \end{tabular}
 \label{table:percentage_contrib_by_race}
 \end{table}
 
 \section*{Discussion}
-We use voter registration data to learn a model between sequences of characters in a name and race and ethnicity. Given poor African Americans tend to have distinctive first names, the biggest advantage in using the full name as opposed to last names is in our ability to detect African American names. The big benefit comes from when both the first name and last name is known. And there are a lot of important datasets, such as the campaign contributions dataset, the voter registration files of other states, news data, etc., where we have information on both the first and the last names. And we could make better predictions about the race and ethnicity by capitalizing on both the first and the last names, especially for African Americans, but also for other races and ethnicities.
+We use voter registration data to learn a model between sequences of characters in a name and race and ethnicity. Given poor African Americans tend to have distinctive first names, the biggest advantage of using the full name over last names is in our ability to detect African American names. Many important datasets, such as the campaign contributions dataset, voter registration files of other states, news data, etc., contain information on both first and last names. And we could make better predictions about race and ethnicity by using both first and last names. As we noted above, we also provide a Python package that exposes the models: \url{https://github.com/appeler/ethnicolr/}.
 
-We then use the model to infer the race of contributors in the DIME data and find that African Americans are less than a quarter percent of the donors. As we note, we also provide a Python package that exposes the models: \url{https://github.com/appeler/ethnicolr/}.
-
-The limitations of using the voter registration data are obvious. Not everyone is registered to vote, and blacks and Hispanics are especially likely not to be registered to vote \citep{ansolabehere2011gender}. If the names of those who are not on the voter registration file are systematically different from those who are, we are likely somewhat optimistic in our accuracy metrics. Another concern with using data from a single state is that the pattern of names in a single state are different from names given in other states. It is a very reasonable concern. We could overcome it by combining census last name models with state voter registration data models, but more research is needed to see how well we can do.
+Voter registration data has many limitations. First, not everyone is registered to vote, and blacks and Hispanics are especially likely not to be registered to vote \citep{ansolabehere2011gender}. If the names of those who are not on the voter registration file are systematically different from those who are, our accuracy metrics are likely inflated. Second, the pattern of names in a single state may be different from the names in other states. 
 
 \clearpage
 \bibliographystyle{apsr}
@@ -183,6 +163,29 @@ The limitations of using the voter registration data are obvious. Not everyone i
 \counterwithin{table}{section}
 \section*{Supporting Information}\label{si}
 
+\section{Performance of the KNN Models}\label{knn_perf}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the KNN (K = 5) Cosine Distance model on the test set.}
+\begin{tabular}{lrrrr}
+\hline
+               &   precision &   recall &   f1-score &   support \\
+\hline
+   asian      & 0.48    &  0.18 &     0.27  &    1,557\\
+     hispanic   &    0.85   &   0.76   &   0.80   &  10,707\\
+ multi\_racial   &    0.08   &   0.00   &   0.01  &     368\\
+native\_indian   &    0.50  &    0.01   &   0.02  &     121\\
+     nh\_black   &    0.57  &    0.37   &   0.45  &    4,384\\
+     nh\_white   &    0.78   &   0.92   &   0.84  &   25,669\\
+        other   &    0.14   &   0.02   &   0.03   &    627\\
+ weighted\_avg   &    0.75   &   0.77   &   0.75  &   43,433\\
+\hline
+\label{table:knn_last_name}
+\end{tabular}
+\end{table}
+
+\clearpage
 \section{Performance of the Random Forest Models}\label{rf_perf}
 
 \begin{table}[h!]
@@ -210,6 +213,7 @@ The limitations of using the voter registration data are obvious. Not everyone i
 \hline
               &   precision &   recall &   f1-score &   support \\
 \hline
+ asian        &      0.63  &    0.17   &   0.27  &   27,829\\
  hispanic     &        0.78 &     0.66 &       0.72 &    169,058 \\
  nh\_black     &        0.66 &     0.25 &       0.36 &    149,299 \\
  nh\_white     &        0.72 &     0.94 &       0.81 &    573,470 \\
@@ -234,6 +238,7 @@ The limitations of using the voter registration data are obvious. Not everyone i
 \hline
               &   precision &   recall &   f1-score &   support \\
 \hline
+ asian       &   0.53       &     0.03 &        0.05 &     6,867\\
  hispanic     &        0.78 &     0.67 &       0.72 &     38,961 \\
  nh\_black     &        0.62 &     0.08 &       0.15 &     13,726 \\
  nh\_white     &        0.56 &     0.92 &       0.7  &     60,970 \\
@@ -285,7 +290,7 @@ The limitations of using the voter registration data are obvious. Not everyone i
  nh\_black & 0.59        &      0.4  &       0.48 &  13,719    \\
  nh\_white & 0.62        &      0.87 &       0.72 &  60,919    \\
  other    & 0.27        &      0.09 &       0.13 &  14,360    \\
- weighted avg         &      0.63 &       0.65 & 0.62 & 134,784\\
+ weighted\_avg   &      0.63 &       0.65 & 0.62 & 134,784\\
 \hline
 \label{table:lstm_last_name}
 \end{tabular}
@@ -312,5 +317,40 @@ The limitations of using the voter registration data are obvious. Not everyone i
 \clearpage
 \section{Performance of the Transformer Models}\label{transformer_perf}
 
+\begin{table}[h!]
+\centering
+\caption{Performance of the Last Name Transformer model on the test set.}
+\begin{tabular}{llrrrr}
+\hline
+          & precision   &   recall &   f1-score &   support \\
+\hline
+  asian      &  0.45     &  0.01    &   0.01   &    6,860\\
+ hispanic & 0.77        &     0.66 &       0.71 &  38,936    \\
+ nh\_black & 0.47        &     0.07 &       0.12 &  13,717    \\
+ nh\_white & 0.56        &     0.91 &       0.69 &  60,910    \\
+ other    & 0.00        &     0    &       0    &  14,361    \\
+ weighted\_avg  &      0.55 &       0.61 &      0.53 & 134,784 \\
+\hline
+\label{table:transformer_last_name}
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Performance of the Full Name Transformer model on the test set.}
+\begin{tabular}{lrrrr}
+\hline
+              &   precision &   recall &   f1-score &   support \\
+\hline
+  asian      & 0.62  &    0.09  &    0.16    & 27,824\\
+ hispanic     &        0.66 &     0.51 &       0.57 &    169,041 \\
+ nh\_black     &        0.49 &     0.04 &       0.07 &    149,283 \\
+ nh\_white     &        0.66 &     0.94 &       0.78 &    573,408 \\
+ other        &        0    &     0    &       0    &     40,188 \\
+ weighted\_avg &        0.61 &     0.66 &       0.58 &    959,744 \\
+\hline
+\label{table:transformer_full_name}
+\end{tabular}
+\end{table}
 
 \end{document}

@@ -33,7 +33,8 @@
 	* See also [Github Repository](https://github.com/appeler/edit_names) for stuff like LSH Minhash implementation.
 
 7. Multi Output Regression
-	* [Last Name](notebooks/5.2_multioutput_regressor_lastname.ipynb)
+	* [Last Name (MLP)](notebooks/5.2_multioutput_regressor_lastname.ipynb)
+	* [Last Name (LSTM)](notebooks/5.2_multioutput_regressor_lastname.ipynb)
 
 8. LSTM with Synthetic Data Last Name
 	* [Synthetic Data](notebooks/8.0_lastname_variations.ipynb). Output [here](data/name_variations.csv)
@@ -41,18 +42,15 @@
 
 9. Validation
 	* North Carolina
-	* Census
+	* [Census](notebooks/12.1_census_validation.ipynb)
 	* Rosenman et al.
 
-10. Application
+10. Applications
 	* Diversity of Campaign Donations
 		* [DIME](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/9.1_stanford_dime.ipynb) from https://data.stanford.edu/dime
 		* [Analyses](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/9.2_dime_lstm_infer.ipynb)
 	* Diversity in News
-		* [CNN Data Parsing](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/10.1_cnn_news_ner_data.ipynb)
-			(data from: https://github.com/notnews/top_news)
-		* [CNN Analyses](https://github.com/appeler/ethnicolr_v2/blob/master/notebooks/10.2_cnn_lstm_infer.ipynb)
-		* Fuller analysis will be posted here: https://github.com/notnews/rainbow
+		* https://github.com/notnews/rainbow
 
 11. Interpretation
 	* [RF](notebooks/11.1_rf_fullname_interp.ipynb)
