@@ -60,13 +60,15 @@ To answer questions about racial inequality and fairness, we often need a way to
 \clearpage
 \doublespace
 
-How often are people of different races and ethnicities covered in the news? What percentage of campaign contributions come from African Americans? Are there racial gaps in healthcare delivery? Do minorities face discrimination in borrowing? To answer such questions, we often need a way to infer race and ethnicity from names. Given the important questions at stake, a number of researchers have worked on methods to infer race from names \citep[see, e.g.,][]{ambekar2009name, fiscella2006use, imai2016improving, rosenman2022race}. We contribute to this substantial literature.
+How often are people of different races and ethnicities covered in the news? What percentage of campaign contributions come from African Americans? Are there racial gaps in healthcare delivery? Do minorities face discrimination in borrowing? To answer such questions, we often need a way to infer race and ethnicity from names. Given the important questions at stake, several researchers have worked on methods to infer race from names \citep[see, e.g.,][]{ambekar2009name, fiscella2006use, imai2016improving, rosenman2022race}. We contribute to this substantial literature.
 
 \section*{Inferring Race and Ethnicity from Names}
 
-\subsection*{Approaches} Researchers have used a variety of approaches to infer race and ethnicity from names. Some researchers have taken advantage of the Census Bureau's list of popular last names \citep[see, e.g.,][]{fiscella2006use}. The approach suffers from three weaknesses---a biased small set of popular last names, a lack of first names, and a decennial update cadence. The information in the first name is especially vital for accurately identifying African Americans, whose last names are hard to distinguish from non-Hispanic whites, and whose first names tend to be distinctive \citep{bertrand2004emily}. Others have harvested Wikipedia data on names and their national origins and used crude features of names to build a national origins classifier \citep{ambekar2009name}. The downside of Wikipedia is that the database is small and suffers from a strong bias toward popular people. Yet others have used private communication data and homophily to predict national origin \citep{ye2017nationality}. The limitation here is that the data are private. Lastly, some researchers like us have used voter registration data \citep{sood2018predicting, parasurama2021racebert}.\footnote{There is a parallel literature that combines voter registration data with census data to infer race where we have the name and location of a person \citep[see for e.g.,]{imai2016improving, kotovadeep}.} The voter registration data also has its own tradeoffs. Primarily, the voter registration data which includes the race of the voter is published by a few states, the race variable is often crudely coded, and not everyone is registered to vote. These issues create concerns about its generalizability.
+\subsection*{Approaches} Researchers have used a variety of approaches to infer race and ethnicity from names. Some researchers have taken advantage of the Census Bureau's list of popular last names \citep[see, e.g.,][]{fiscella2006use}. The approach suffers from three weaknesses---a biased small set of popular last names, a lack of first names, and a decennial update cadence. The bias toward popular names in census data has grave consequences. First, over 82\% of the unique last names included in the census are for NH Whites. This is partly a result of the hard numerical criteria of the last name being shared by 100 or more people which disproportionately affects minorities. Second, last names have a very long tail. Our Florida voter registration database itself has well over a million unique last names. (Part of the long tail may come from errors in how people spell the name but that itself can be seen as its strength as it more realistically generalizes to databases with spelling errors.) The lack of first names is also very consequential. The information in the first name is especially vital for accurately identifying African Americans, whose last names are hard to distinguish from non-Hispanic (NH) whites, and whose first names tend to be distinctive \citep{bertrand2004emily}. 
 
-\subsection*{Estimand} We predict the modal race and ethnicity of people with a particular name. In the SI, we show results from a model that predicts the probability distribution. 
+Other scholars have harvested Wikipedia data on names and their national origins and used crude features of names to build a national origins classifier \citep{ambekar2009name}. The downside of Wikipedia is that the database is small and suffers from a strong bias toward popular people. Yet others have used private communication data and homophily to predict national origin \citep{ye2017nationality}. The limitation here is that the data are private. Lastly, some researchers like us have used voter registration data \citep{sood2018predicting, parasurama2021racebert}.\footnote{There is a parallel literature that combines voter registration data with census data to infer race where we have the name and location of a person \citep[see e.g.,]{imai2016improving, kotovadeep}.} The voter registration data also has its trade-offs. Primarily, the voter registration data which includes the race of the voter is published by a few states, the race variable is often crudely coded, and not everyone is registered to vote \citep{ansolabehere2011gender}. These issues create concerns about its generalizability.
+
+\subsection*{Estimand} We predict the modal race and ethnicity of people with a particular name.\footnote{For models that predict the probability distribution, see \url{https://github.com/appeler/colorquant}}. For last-name models, it means grouping by last name and calculating the modal race and ethnicity of people with that last name. For full-name models, it means calculating the modal race and ethnicity of people with that full name. Hence, the full-name models are estimated on a much finer grain.
 
 \subsection*{Why Model?} If you picked a person at random with the last name Smith from the US in 2010 and were asked to guess this person's race (as measured by the census), the best guess would be based on what is available from the aggregated Census popular last names file. It is the Bayes optimal solution. So what good are last-name predictive models for? Primarily two things. First, the model is useful to predict the race and ethnicity of people whose names are not in the popular last names list. Second, it can be useful in predicting the race and ethnicity of names in databases where names have spelling errors, etc.
 
@@ -80,13 +82,13 @@ There are very few cases of people not providing their race or ethnicity. We ass
 \caption{Registered Voters in Florida by Race.}
 \begin{tabular}{ l c }
 \hline    
-race & n \\
+Race/Ethnicity & n \\
 \hline
-nh\_white  &       9,446,770 \\
-hispanic   &       2,722,579 \\
-nh\_black  &       2,086,582 \\
-asian      &       329,034 \\
-other      &       424308 \\
+NH White  &       9,446,770 \\
+Hispanic   &       2,722,579 \\
+NH Black  &       2,086,582 \\
+Asian      &       329,034 \\
+Other      &       424308 \\
 \hline
 \end{tabular}
 \label{table:fl_data}
@@ -95,61 +97,84 @@ other      &       424308 \\
 In addition to the Florida Voter Registration data, we also use the Census Popular Last Name Data \citep{census2010} and the North Carolina Voter Registration Data. 
 
 \section*{Models}
-We try models with varying degrees of sophistication starting with the simplest: an edit-distance based KNN model. We follow that by representing names as a 'Bag of Characters' and learning the relationship with ethno-racial categories using Random Forests and Gradient Boosted Trees. Lastly, we model the relationship between the sequence of characters and categories using LSTM and Transformer models. For last names for which we have much less data, we also try an LSTM model that leverages synthetic data.
+We try models with varying degrees of sophistication starting with the simplest: an edit-distance based KNN model. We follow that by representing names as a 'Bag of Characters' and learning the relationship with ethno-racial categories using Random Forests (RF) and Gradient Boosted (GB) Trees. Lastly, we model the relationship between the sequence of characters and categories using LSTM and Transformer models. For last names for which we have much less data, we also try an LSTM model that leverages synthetic data.
 
 For the models, we process the data in the following way. We first process the names: 1. transform the first and last names to title case, 2. remove any non-alphabetical characters or hyphens, 3. concatenate the last name and first name (ignoring the middle name) for the full name model. Second, we group data by last name or full name and get the conditional means for each of the five ethno-racial categories and find the modal race. These datasets serve as our final data. To learn all the classifiers, we split the corpus into train, validation, and test sets with proportions of .8, .1, and .1 respectively.
 
 \begin{itemize}
 
-    \item \textbf{KNN} If we had a census of all the names, and the name was the only data we had about a person, then the Bayes Optimal Classifier for predicting the race of the person with that name is the racial category with the largest probability density. As we noted above, this data is unavailable. Assuming we do not have the full list of names or that names in the right table can have spelling errors, the next simplest classifier is an edit-distance-based classifier. We use a bi-char-based distance metric to estimate a KNN classifier. For the last name model, we use cosine distance.\footnote{Experiments suggest that using a more computationally expensive distance metric like Levenshtein distance doesn't improve performance: \url{ttps://github.com/appeler/edit_names}}. For computational reasons, for the full name model, we use the Jaccard distance via LSH Minhash for 70\% of the training set.
+    \item \textbf{KNN.} If we had a census of all the names, and the name was the only data we had about a person, then the Bayes Optimal Classifier for predicting the race of the person with that name is the racial category with the largest probability density. As we noted above, this data is unavailable. Assuming we do not have the full list of names or that names in the right table can have spelling errors, the next simplest classifier is an edit-distance-based classifier. We use a bi-char-based distance metric to estimate a KNN classifier. For the last name model, we use cosine distance.\footnote{Experiments suggest that using a more computationally expensive distance metric like Levenshtein distance doesn't improve performance: \url{https://github.com/appeler/edit_names}}. For computational reasons, for the full name model, we use the Jaccard distance via LSH Minhash for 70\% of the training set.
 
-    \item \textbf{RF and GB} We use a bag of char and bi-char representation of names to learn the relationship between names and ethno-racial categories. We remove infrequent tokens (occurring less than 3 times in the data) and very frequent bi-chars (occurring in over 30\% of the sequences in the data). (See the notebooks for more details.)
+    \item \textbf{RF and GB.} We use a bag of char and bi-char representations of names to learn the relationship between names and ethno-racial categories. We remove infrequent tokens (occurring less than 3 times in the data) and very frequent bi-chars (occurring in over 30\% of the sequences in the data). (See the notebooks for more details.)
     
-    \item \textbf{LSTM} To learn the association between the sequence of characters in names and race and ethnicity, we estimate an LSTM model \citep{graves2005framewise, gers1999learning}. We embed each of the characters in the name in a 256-length real-valued vector before passing it on to two LSTM layers followed by a fully connected layer and a log softmax. We use Negative Log Likelihood Loss and Adam for optimization \citep{kingma2014adam}. (See the notebooks for more details.)
+    \item \textbf{LSTM.} To learn the association between the sequence of characters in names and race and ethnicity, we estimate an LSTM model \citep{graves2005framewise, gers1999learning}. We embed each of the characters in the name in a 256-length real-valued vector before passing it on to two LSTM layers followed by a fully connected layer and a log softmax. We use Negative Log Likelihood Loss and Adam for optimization \citep{kingma2014adam}. (See the notebooks for more details.)
 
-    \item \textbf{Transformer} We once again start by embedding the characters. We next also estimate the positional encodings before passing on two transformer layers and a log softmax. The other details are the same as in LSTM. (See the notebooks for more details.)
+    \item \textbf{Transformer.} We once again start by embedding the characters. We next also estimate the positional encodings before passing on two transformer layers and a log softmax. The other details are the same as in LSTM. (See the notebooks for more details.)
     
     \end{itemize}
 
 \section*{Results}
 
-Table \ref{table:oos_last_name_perf} presents some metrics tracking performance of the last-name model on the holdout set in Florida Voter Registration Data. The OOS precision and recall of the KNN model is .76 and .78 respectively. There is however sizable variation in recall across different racial and ethnic groups. For instance, recall is .90 for whites and just .38 for non-Hispanic blacks. 
+\subsection*{Last-Name Models}
+The best-performing KNN model achieves a 78\% accuracy on the hold-out set (see Table~\ref{table:knn_last_name}. (See \ref{si} for confusion matrices on the hold-out set of all the models.) Of the other models (see Table~ \ref{table:oos_last_name_perf}), only the LSTM model beats the accuracy of the KNN model. The LSTM model is also the top-performing model across subgroups. The model does well when we predict the race and ethnicity of names in the census popular names data as well. The overall accuracy on the census data is about 87\% with accuracy for Non-Hispanic Whites, Hispanics, Asians, and Non-Hispanic Blacks 98\%, 58\%, 42\%, and 26\% respectively. Lastly, we augment the training dataset with synthetic names to see if that improves generalizability. To generate synthetic names, we prompt  ChatGPT to ``give me 10 most common alternate spellings of the last name'' and append the data for popular names. Adding synthetic data provides no appreciable gains in accuracy.
 
 \input{tabs/ln_perf}
 
-Compared to the last-name model, we do much better with a full-name model. The OOS precision, recall, and f1-score for the full name model are .83, .84, and .83 respectively (see Table \ref{table:oos_full_name_perf}). The gains are, however, asymmetric. The recall is considerably better for Asians and Non-Hispanic blacks with the full name---.49 and .43 respectively, compared to .41 and .21 respectively. The precision with which we predict non-Hispanic Blacks is also considerably higher---it is 9 points higher for the full name model. Given Asians and Hispanics have more distinctive last names, the improvement in precision in predicting both is smaller---negligible in the case of Asians and 2 points in the case of Hispanics.
+Even though the LSTM model based on the Florida Voter Registration data performs well on the census data, a better dataset for modeling patterns in the census may be the census data itself. To that end, we also estimate an LSTM model on the census popular last names data. The model achieves an accuracy of 86\% on the hold-out set. Adding synthetic data improves the accuracy by a percentage point to 87\%.
+
+\subsection*{Full-Name Models}
+Next, we discuss the results for the full-name models. The best-performing KNN model achieves an accuracy of 73\%.\footnote{In our experiments on a smaller corpus, we find that the cosine distance method achieves 2--3\% greater accuracy than the approximate LSH Minhash results reported here.} Table~\ref{table:oos_full_name_perf} presents the results for the other full-name models---RF, GB, LSTM, and Transformer. As before, LSTM dominates the other models and is the only model that outperforms KNN. The accuracy of the LSTM model never dips below 63\% for any category except for Other.
 
 \input{tabs/fn_perf}
 
+\subsection*{Does Adding the First Name Add Predictive Value?}
 
-\section*{Application}
-To illustrate the utility of the models we have developed here, we impute the race and ethnicity of individual campaign contributors in the 2014 campaign contribution databases \citep{bonica2017database} using just the Census last name data and the Florida full name model. We then use the inferred race and ethnicity to estimate the proportion of total contributions made by people of different races. 
+As we noted above, our estimand for full-name models is the modal race of a person with a particular full-name. This is a much finer level of inference given the extraordinary uniqueness of first names. But does adding the first name add value? To test that, we compare the performance of the full name model and the last name model on the hold-out set for the full name. The best-performing last name model achieves an accuracy of 74\% compared to 85\% for the best-performing full name model. In particular, note that the accuracy for NH Blacks goes from 21\% to 74\%.
 
-Based on the census last name data, in 2010, about 83.5\% of contributions were made by Whites (see Table \ref{table:percentage_contrib_by_race}). But the commensurate number calculated using the Florida full name model was nearly 3\% more, 86.5\%. Moving to blacks, we see a similar story. Based on census last name data about 10.2\% of contributions came from blacks. But based on Florida's full name model, the number is about 2.3\% lower, or a 22.2\% relative change. The commensurate difference in estimated contributions by Hispanics is about 1\% or about 33\% relative change. Among Asians, the commensurate difference is about .5\% points or about 18\% relative change. A similar pattern holds for 2000. We see that Whites contribute less based on Census last name data than Florida full name model.
 
-\begin{table}[h!]
+\section*{Applications}
+To illustrate the utility of the models we present here, we use them to answer two important questions: 1. Who contributes to politicians? 2. Diversity in the newsroom and the people mentioned. 
+
+To the extent that money buys political influence, it is helpful to examine campaign contributions to politicians. To learn who contributes to politicians, we imputed the race and ethnicity of individual campaign contributors in the 2014 campaign contribution database \citep{bonica2017database} using the Florida full-name LSTM model. As Table~\ref{table:campaign} shows, 89.5\% of the money was contributed by Non-Hispanic Whites, 4.4\% by Non-Hispanic Blacks, 2.6\% by Hispanics, and 3.4\% by Asians. (For comparison, Non-Hispanic Whites were about 64\% of the population in 2014.) 
+
+\begin{table}[ht!]
 \centering
-\caption{Proportion of Total Amount Donated to Political Campaigns in 2000 and 2010 by People of Different Races/Ethnicities.}
-\begin{tabular}{ l c c c c}
+\caption{Share of Political Contributions by Race/Ethnicity}
+\label{table:campaign}
+\begin{tabular}{lc}
+  \hline
+  Race/Ethnicity & Percentage \\
+  \hline
+  NH White & 89.5\% \\
+  NH Black & 4.4\% \\
+  Hispanic & 2.6\% \\
+  Asian & 3.4\% \\
+  Other & .1\% \\
+  \hline
+\end{tabular}
+\end{table}
+
+To shed light on diversity in the newsroom and people mentioned in the news, we exploited the Top News dataset \citep{willis2023}. The dataset is a collection of articles from news feeds from major news sites like ABC, CBS, CNN, NBC, LA Times, NBC, NYT, Politico, USAT, and WaPo since June 2022. We used the newspaper library \citep{lucas} to parse the data and get the author(s) and the text of each article. We then used NER to extract people's names from the text. As Table~\ref{table:news} shows, Non-Hispanic Whites are overrepresented in the newsroom and in the mentions--78\% of the authors and 73.5\% of the mentions are to Non-Hispanic Whites. On the other hand, African Americans and Hispanics are underrepresented in the newsroom and in mentions.
+
+\begin{table}[ht!]
+\centering
+\caption{Share of Political Contributions by Race/Ethnicity}
+\label{table:news}
+\begin{tabular}{lcc}
 \hline
-         & \multicolumn{2}{c}{Census} & \multicolumn{2}{c}{Florida}\\
+Race/Ethnicity & Percentage of Authors & Percentage of Mentions \\
 \hline
-race     &     2000     & 2010     &    2000    & 2010\\    
-\hline
-asian    &     2.22\%   & 2.74\%   &   2.00\%   & 2.28\%\\
-black    &     11.04\%  & 10.22\%  &   8.93\%   & 7.92\%\\
-hispanic &     3.24\%   & 4.32\%   &   3.23\%   & 3.31\%\\
-white    &     83.49\%  & 82.71\%  &   85.84\%  & 86.49\%\\
-other    &     83.49\%  & 82.71\%  &   85.84\%  & 86.49\%\\
+NH White & 78\% & 73.5\% \\
+NH Black & 5.7\% & 9.5\% \\
+Hispanic & 7.3\% & 8\% \\
+Asian & 8.5\% & 8.6\% \\
+Other & 0.4\% & 0.4\% \\
 \hline
 \end{tabular}
-\label{table:percentage_contrib_by_race}
 \end{table}
 
 \section*{Discussion}
-We use voter registration data to learn a model between sequences of characters in a name and race and ethnicity. Given poor African Americans tend to have distinctive first names, the biggest advantage of using the full name over last names is in our ability to detect African American names. Many important datasets, such as the campaign contributions dataset, voter registration files of other states, news data, etc., contain information on both first and last names. And we could make better predictions about race and ethnicity by using both first and last names. As we noted above, we also provide a Python package that exposes the models: \url{https://github.com/appeler/ethnicolr/}.
-
-Voter registration data has many limitations. First, not everyone is registered to vote, and blacks and Hispanics are especially likely not to be registered to vote \citep{ansolabehere2011gender}. If the names of those who are not on the voter registration file are systematically different from those who are, our accuracy metrics are likely inflated. Second, the pattern of names in a single state may be different from the names in other states. 
+If you know nothing about a person but the last name, then the best guess for their race and ethnicity is what is provided by the Census popular last name dataset. But as we note, multiple things complicate the picture. Census data is incomplete, census data is biased, the data you may have may contain spelling errors, the data you may have may contain first names, etc. Under those circumstances, using a last-name or full-name model may provide a more accurate prediction. The LSTM models provide excellent accuracy with KNN models surprisingly coming in second.
 
 \clearpage
 \bibliographystyle{apsr}
@@ -162,7 +187,7 @@ Voter registration data has many limitations. First, not everyone is registered 
 \renewcommand\thefigure{\thesection.\arabic{figure}}
 \counterwithin{figure}{section}
 \counterwithin{table}{section}
-\section*{Supporting Information}\label{si}
+\section{Supporting Information}\label{si}
 
 \section{Performance of the KNN Models}\label{knn_perf}
 
